@@ -14,7 +14,7 @@ return new class extends Migration
        Schema::create('questions', function (Blueprint $table) {
     $table->id();
     $table->string('name');
-    $table->boolean('isactive')->default(true);
+    $table->boolean('is_active')->default(true);
     $table->string('questiontype')->nullable();
     $table->string('answertype')->nullable();
     $table->string('tags')->nullable();

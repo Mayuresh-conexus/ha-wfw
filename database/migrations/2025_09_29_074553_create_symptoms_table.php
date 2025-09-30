@@ -15,7 +15,7 @@ return new class extends Migration
     $table->id();
     $table->string('name');
     $table->string('type')->nullable();
-    $table->boolean('isactive')->default(true);
+    $table->boolean('is_active')->default(true);
     $table->string('tag')->nullable();
     $table->boolean('iscritical')->default(false);
     $table->timestamps();

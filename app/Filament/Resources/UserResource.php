@@ -15,6 +15,15 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-user';
 
+    protected static ?string $navigationGroup = 'Filament Shield';
+
+    public static function getNavigationBadge(): ?string
+    {
+        // Return number of records
+        return (string) User::count();
+    }
+
+
     public static function form(Form $form): Form
     {
         return $form->schema([

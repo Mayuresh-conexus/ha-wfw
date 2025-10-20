@@ -6,51 +6,63 @@ use App\Filament\Resources\SymptomResource\Pages;
 use App\Models\Symptom;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 
 class SymptomResource extends Resource
 {
     protected static ?string $model = Symptom::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-exclamation-triangle';
-
     protected static ?int $navigationSort = 7;
-     
-      public static function getNavigationBadge(): ?string
+
+    public static function getNavigationBadge(): ?string
     {
-        // Return number of records
         return (string) Symptom::count();
     }
-
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->label('Symptom Name')
                     ->required()
                     ->maxLength(255),
 
-                Forms\Components\TextInput::make('type')
+                TextInput::make('type')
                     ->label('Type')
-                    ->maxLength(255)
-                    ->nullable(),
+                    ->nullable()
+                    ->maxLength(255),
 
-                Forms\Components\TextInput::make('tag')
+                TextInput::make('tag')
                     ->label('Tag')
-                    ->maxLength(255)
-                    ->nullable(),
+                    ->nullable()
+                    ->maxLength(255),
 
-                Forms\Components\Toggle::make('isactive')
-                    ->label('Active')
-                    ->default(true),
+              
+                    ToggleButtons::make('is_active')
+                        ->label('Active')
+                        ->options([1 => 'Active', 0 => 'Inactive'])
+                        ->colors([1 => 'success', 0 => 'danger'])
+                        ->inline()
+                        ->default(1),
 
-                Forms\Components\Toggle::make('iscritical')
-                    ->label('Critical')
-                    ->default(false),
+                    ToggleButtons::make('iscritical')
+                        ->label('Critical')
+                        ->options([1 => 'Yes', 0 => 'No'])
+                        ->colors([1 => 'danger', 0 => 'secondary'])
+                        ->inline()
+                        ->default(0),
+
             ]);
     }
 
@@ -58,31 +70,49 @@ class SymptomResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('type')->sortable(),
-                Tables\Columns\TextColumn::make('tag'),
-                Tables\Columns\IconColumn::make('isactive')->boolean()->label('Active'),
-                Tables\Columns\IconColumn::make('iscritical')->boolean()->label('Critical'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime('d M Y H:i'),
-            ])
-            ->filters([
-                Tables\Filters\TernaryFilter::make('isactive')
-                    ->label('Active Status')
-                    ->boolean(),
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->sortable()->searchable(),
+                TextColumn::make('type')->sortable(),
+                TextColumn::make('tag')->sortable(),
 
-                Tables\Filters\TernaryFilter::make('iscritical')
-                    ->label('Critical Status')
-                    ->boolean(),
+                BadgeColumn::make('isactive')
+                    ->label('Active')
+                    ->getStateUsing(fn ($record) => $record->isactive ? 'Active' : 'Inactive')
+                    ->colors([
+                        'success' => fn ($state) => $state === 'Active',
+                        'danger' => fn ($state) => $state === 'Inactive',
+                    ]),
+
+                BadgeColumn::make('iscritical')
+                    ->label('Critical')
+                    ->getStateUsing(fn ($record) => $record->iscritical ? 'Yes' : 'No')
+                    ->colors([
+                        'danger' => fn ($state) => $state === 'Yes',
+                        'secondary' => fn ($state) => $state === 'No',
+                    ]),
+
+                TextColumn::make('created_at')->dateTime('d M Y H:i')->label('Created'),
+            ])
+            ->filters([])
+            ->headerActions([
+                CreateAction::make()
+                    ->label('New Symptom')
+                    ->modalHeading('Create Symptom')
+                    ->modalWidth('lg')
+                    ->createAnother(true),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make()
+                    ->modalHeading('Edit Symptom')
+                    ->modalWidth('lg'),
+
+                DeleteAction::make()
+                    ->modalHeading('Delete Symptom')
+                    ->modalSubheading('Are you sure you want to delete this record?')
+                    ->requiresConfirmation(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
@@ -94,9 +124,8 @@ class SymptomResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListSymptoms::route('/'),
-            'create' => Pages\CreateSymptom::route('/create'),
-            'edit'   => Pages\EditSymptom::route('/{record}/edit'),
+            'index' => Pages\ListSymptoms::route('/'),
+            // Remove create/edit pages as modals handle them
         ];
     }
 }

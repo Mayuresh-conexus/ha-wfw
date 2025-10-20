@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('specialities', function (Blueprint $table) {
     $table->id();
     $table->string('name');
-    $table->boolean('isactive')->default(true);
+    $table->boolean('is_active')->default(true);
     $table->timestamps();
 });
 

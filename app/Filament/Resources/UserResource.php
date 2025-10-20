@@ -9,33 +9,73 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-user';
-
     protected static ?string $navigationGroup = 'Filament Shield';
 
     public static function getNavigationBadge(): ?string
     {
-        // Return number of records
         return (string) User::count();
     }
-
 
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\TextInput::make('name')->required()->maxLength(255),
-            Forms\Components\TextInput::make('email')->email()->required()->unique(User::class, 'email', ignoreRecord: true),
-            Forms\Components\TextInput::make('mobile')->tel()->maxLength(20),
-            Forms\Components\TextInput::make('address')->maxLength(255),
-            Forms\Components\TextInput::make('nlnumber')->maxLength(50),
-            Forms\Components\TextInput::make('proofid')->maxLength(100),
-            Forms\Components\Toggle::make('isactive')->default(true),
-            Forms\Components\TextInput::make('password')->password()->required(fn ($livewire) => $livewire instanceof Pages\CreateUser)
+            Forms\Components\TextInput::make('name')
+                ->required()
+                ->maxLength(255),
+
+            Forms\Components\TextInput::make('email')
+                ->email()
+                ->required()
+                ->unique(User::class, 'email', ignoreRecord: true),
+
+            Forms\Components\TextInput::make('mobile')
+                ->tel()
+                ->maxLength(20),
+
+            Forms\Components\TextInput::make('address')
+                ->maxLength(255),
+
+            Forms\Components\TextInput::make('nlnumber')
+                ->maxLength(50),
+
+            Forms\Components\TextInput::make('proofid')
+                ->maxLength(100),
+
+            Forms\Components\Toggle::make('isactive')
+                ->label('Active Status')
+                ->inline()
+                ->default(true)
+                ->onIcon('heroicon-o-check-circle')
+                ->offIcon('heroicon-o-x-circle'),
+
+            Forms\Components\TextInput::make('password')
+                ->password()
+                ->required(fn ($livewire) => $livewire instanceof Pages\CreateUser)
                 ->dehydrateStateUsing(fn ($state) => bcrypt($state)),
+
+            // Role dropdown
+            Forms\Components\Select::make('roles')
+    ->label('Role')
+    ->options(Role::pluck('name', 'name'))
+    ->multiple() // remove if only one role per user
+    ->required()
+    ->afterStateHydrated(function ($component, $state, $record) {
+        if ($record) {
+            $component->state($record->roles->pluck('name')->toArray());
+        }
+    })
+    ->dehydrateStateUsing(function ($state, $record) {
+        if ($record) {
+            $record->syncRoles($state);
+        }
+    }),
+
         ]);
     }
 
@@ -46,8 +86,10 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('email')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('mobile')->sortable(),
-                Tables\Columns\IconColumn::make('isactive')->boolean(),
-                Tables\Columns\TextColumn::make('created_at')->dateTime(),
+                Tables\Columns\IconColumn::make('isactive')
+                    ->boolean()
+                    ->label('Active'),
+                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Created'),
             ])
             ->filters([])
             ->actions([

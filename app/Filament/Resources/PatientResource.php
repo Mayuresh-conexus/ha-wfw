@@ -6,50 +6,106 @@ use App\Filament\Resources\PatientResource\Pages;
 use App\Models\Patient;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Forms\Components\FileUpload;
+
 
 class PatientResource extends Resource
 {
     protected static ?string $model = Patient::class;
     protected static ?string $navigationIcon = 'heroicon-o-users';
-
     protected static ?int $navigationSort = 5;
-     
-      public static function getNavigationBadge(): ?string
+
+    public static function getNavigationBadge(): ?string
     {
-        // Return number of records
         return (string) Patient::count();
     }
 
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Forms\Components\TextInput::make('name')->required()->maxLength(255),
-            Forms\Components\TextInput::make('filenumber')->required()->unique(ignoreRecord: true),
-            Forms\Components\TextInput::make('email')->email(),
-            Forms\Components\TextInput::make('mobile')->tel(),
-            Forms\Components\DatePicker::make('dob'),
-            Forms\Components\TextInput::make('height')->numeric(),
-            Forms\Components\TextInput::make('weight')->numeric(),
-            Forms\Components\Toggle::make('smoke')->default(false),
-            Forms\Components\Toggle::make('drinkalcohol')->default(false),
-            Forms\Components\Textarea::make('hobbies'),
-            Forms\Components\Textarea::make('reasonvisit'),
-            Forms\Components\TextInput::make('bp'),
-            Forms\Components\TextInput::make('heartrate'),
-            Forms\Components\TextInput::make('occupation'),
-            Forms\Components\Select::make('gender')->options(['Male' => 'Male', 'Female' => 'Female', 'Other' => 'Other']),
-            Forms\Components\Toggle::make('isactive')->default(true),
-            Forms\Components\FileUpload::make('profile'),
-            Forms\Components\Textarea::make('existingmedicalcondition'),
-            Forms\Components\Textarea::make('existingmedicalhistory'),
-            Forms\Components\Textarea::make('existingmedication'),
-            Forms\Components\TextInput::make('preferredphysician'),
-            Forms\Components\TextInput::make('oxygensaturation')->numeric(),
-            Forms\Components\TextInput::make('temperature')->numeric(),
-            Forms\Components\Textarea::make('additionalcomment'),
+            Grid::make(2)->schema([
+                TextInput::make('name')->required()->maxLength(255),
+                TextInput::make('filenumber')->required()->unique(ignoreRecord: true),
+            ]),
+
+            Grid::make(2)->schema([
+                TextInput::make('email')->email(),
+                TextInput::make('mobile')->tel(),
+            ]),
+
+            Grid::make(2)->schema([
+                DatePicker::make('dob')->label('Date of Birth'),
+                Select::make('gender')
+                    ->options(['Male' => 'Male', 'Female' => 'Female', 'Other' => 'Other'])
+                    ->required(),
+            ]),
+
+            Grid::make(2)->schema([
+                TextInput::make('height')->numeric(),
+                TextInput::make('weight')->numeric(),
+            ]),
+
+            Grid::make(2)->schema([
+                ToggleButtons::make('smoke')
+                    ->label('Smoking')
+                    ->options([1 => 'Yes', 0 => 'No'])
+                    ->colors([1 => 'danger', 0 => 'success'])
+                    ->inline()
+                    ->default(0),
+
+                ToggleButtons::make('drinkalcohol')
+                    ->label('Drinks Alcohol')
+                    ->options([1 => 'Yes', 0 => 'No'])
+                    ->colors([1 => 'danger', 0 => 'success'])
+                    ->inline()
+                    ->default(0),
+            ]),
+
+            Textarea::make('hobbies')->columnSpanFull(),
+            Textarea::make('reasonvisit')->columnSpanFull()->label('Reason To Visit'),
+
+            Grid::make(3)->schema([
+                TextInput::make('bp')->label('Blood Pressure'),
+                TextInput::make('heartrate')->label('Heart Rate'),
+                TextInput::make('temperature')->label('Temperature')->numeric(),
+            ]),
+
+            Grid::make(2)->schema([
+                TextInput::make('occupation'),
+                TextInput::make('preferredphysician')->label('Preferred Physician'),
+            ]),
+
+            TextInput::make('oxygensaturation')->numeric()->label('Oxygen Saturation'),
+
+            ToggleButtons::make('isactive')
+                ->label('Status')
+                ->options([1 => 'Active', 0 => 'Inactive'])
+                ->colors([1 => 'success', 0 => 'danger'])
+                ->inline()
+                ->default(1),
+
+            FileUpload::make('profile')->columnSpanFull(),
+
+            Grid::make(2)->schema([
+            Textarea::make('existingmedicalcondition')->label('Existing Medical Condition'),
+            Textarea::make('existingmedicalhistory')->label('Existing Medical History'),
+            ]),
+            Grid::make(2)->schema([
+            Textarea::make('existingmedication')->label('Existing Medication'),
+            Textarea::make('additionalcomment')->label('Additional Comment'),
+            ]),
         ]);
     }
 
@@ -57,18 +113,24 @@ class PatientResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('filenumber')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('mobile'),
-                Tables\Columns\IconColumn::make('isactive')->boolean(),
-                Tables\Columns\TextColumn::make('dob')->date(),
+                TextColumn::make('name')->sortable()->searchable(),
+                TextColumn::make('filenumber')->sortable()->searchable(),
+                TextColumn::make('mobile'),
+                BadgeColumn::make('isactive')
+                    ->label('Status')
+                    ->getStateUsing(fn ($record) => $record->isactive ? 'Active' : 'Inactive')
+                    ->colors([
+                        'success' => fn ($state) => $state === 'Active',
+                        'danger' => fn ($state) => $state === 'Inactive',
+                    ]),
+                TextColumn::make('dob')->date(),
             ])
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ]);
     }
 

@@ -24,7 +24,7 @@ return new class extends Migration {
             $table->string('heartrate')->nullable();
             $table->string('occupation')->nullable();
             $table->string('gender')->nullable();
-            $table->boolean('isactive')->default(true);
+            $table->boolean('is_active')->default(true);
             $table->string('profile')->nullable();
             $table->text('reasontovisit')->nullable();
             $table->text('existingmedicalcondition')->nullable();

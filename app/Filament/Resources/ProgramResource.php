@@ -8,24 +8,25 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\EditAction;
 
 class ProgramResource extends Resource
 {
     protected static ?string $model = Program::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-plus';
-
     protected static ?int $navigationSort = 1;
      
-      public static function getNavigationBadge(): ?string
+    public static function getNavigationBadge(): ?string
     {
-        // Return number of records
         return (string) Program::count();
     }
 
@@ -33,16 +34,30 @@ class ProgramResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->label('Program Name')
-                    ->required()
-                    ->maxLength(255),
+                Grid::make(2)->schema([
+                    TextInput::make('name')
+                        ->label('Program Name')
+                        ->required()
+                        ->maxLength(255),
+
+                    ToggleButtons::make('isactive')
+                        ->label('Status')
+                        ->options([
+                            1 => 'Active',
+                            0 => 'Inactive',
+                        ])
+                        ->colors([
+                            1 => 'success',
+                            0 => 'danger',
+                        ])
+                        ->inline()
+                        ->default(1),
+                ]),
+
                 Textarea::make('description')
                     ->label('Description')
-                    ->nullable(),
-                Toggle::make('isactive')
-                    ->label('Is Active')
-                    ->default(true),
+                    ->nullable()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -52,8 +67,18 @@ class ProgramResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('name')->sortable()->searchable(),
-                TextColumn::make('description')->limit(50),
-                BooleanColumn::make('isactive')->label('Active')->sortable(),
+                TextColumn::make('description')
+                    ->limit(50)
+                    ->formatStateUsing(fn ($state) => $state ?? '—'),
+
+                BadgeColumn::make('isactive')
+                    ->label('Status')
+                    ->getStateUsing(fn ($record) => $record->isactive ? 'Active' : 'Inactive')
+                    ->colors([
+                        'success' => fn ($state) => $state === 'Active',
+                        'danger' => fn ($state) => $state === 'Inactive',
+                    ]),
+
                 TextColumn::make('created_at')->dateTime()->label('Created'),
                 TextColumn::make('updated_at')->dateTime()->label('Updated'),
             ])
@@ -62,8 +87,22 @@ class ProgramResource extends Resource
                     ->query(fn ($query) => $query->where('isactive', true))
                     ->label('Active Programs'),
             ])
+            ->headerActions([
+                CreateAction::make()
+                    ->label('New Program')
+                    ->modalHeading('Create Program')
+                    ->modalWidth('lg')
+                    ->createAnother(true),
+            ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make()
+                    ->modalHeading('Edit Program')
+                    ->modalWidth('lg'),
+                 Tables\Actions\DeleteAction::make()
+                    ->modalHeading('Delete Speciality') // optional
+                    ->modalSubheading('Are you sure you want to delete this record?') // optional
+                    ->requiresConfirmation(), // default is true
+                        
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
@@ -72,17 +111,14 @@ class ProgramResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListPrograms::route('/'),
-            'create' => Pages\CreateProgram::route('/create'),
-            'edit' => Pages\EditProgram::route('/{record}/edit'),
+            // remove create/edit pages since we’re using modals
         ];
     }
 }

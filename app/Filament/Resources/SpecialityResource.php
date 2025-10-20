@@ -13,33 +13,53 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Auth;
 
 class SpecialityResource extends Resource
 {
     protected static ?string $model = Speciality::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-     protected static ?int $navigationSort = 0;
+    protected static ?int $navigationSort = 0;
      
-      public static function getNavigationBadge(): ?string
+    public static function getNavigationBadge(): ?string
     {
-        // Return number of records
         return (string) Speciality::count();
     }
-
+    
+    public static function shouldRegisterNavigation(): bool
+{
+    return auth()->user()?->can('view_any_speciality');
+}
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->label('Speciality Name')
-                    ->required()
-                    ->maxLength(255),
-                Toggle::make('isactive')
-                    ->label('Is Active')
-                    ->default(true),
-            ]);
+    TextInput::make('name')
+        ->label('Speciality Name')
+        ->required()
+        ->maxLength(255),
+
+    \Filament\Forms\Components\ToggleButtons::make('isactive')
+        ->label('Status')
+        ->options([
+            true => 'Active',
+            false => 'Inactive',
+        ])
+        ->colors([
+            true => 'success',
+            false => 'danger',
+        ])
+        ->inline() // horizontal pill buttons
+        ->default(true),
+]);
+
+
+
+
     }
 
     public static function table(Table $table): Table
@@ -57,9 +77,23 @@ class SpecialityResource extends Resource
                     ->query(fn ($query) => $query->where('isactive', true))
                     ->label('Active Specialities'),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->headerActions([
+                CreateAction::make()
+                    ->label('New Speciality')
+                    ->modalHeading('Create Speciality')
+                    ->modalWidth('lg')
+                    ->createAnother(true), // ✅ allows "Save & create another"
             ])
+            ->actions([
+                EditAction::make()
+                    ->modalHeading('Edit Speciality')
+                    ->modalWidth('lg'),
+
+                     Tables\Actions\DeleteAction::make()
+                    ->modalHeading('Delete Speciality') // optional
+                    ->modalSubheading('Are you sure you want to delete this record?') // optional
+                    ->requiresConfirmation(), // default is true
+                        ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
@@ -67,17 +101,15 @@ class SpecialityResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
+public static function getPages(): array
+{
+    return [
+        'index' => Pages\ListSpecialities::route('/'),
+        // 'create' => Pages\CreateSpeciality::route('/create'),  ❌ remove this
+        // 'edit' => Pages\EditSpeciality::route('/{record}/edit'), ❌ remove this
+    ];
+}
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListSpecialities::route('/'),
-            'create' => Pages\CreateSpeciality::route('/create'),
-            'edit' => Pages\EditSpeciality::route('/{record}/edit'),
-        ];
-    }
 }

@@ -6,37 +6,53 @@ use App\Filament\Resources\HealthReasonResource\Pages;
 use App\Models\HealthReason;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 
 class HealthReasonResource extends Resource
 {
     protected static ?string $model = HealthReason::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-heart';
-
     protected static ?int $navigationSort = 4;
-     
-      public static function getNavigationBadge(): ?string
+
+    public static function getNavigationBadge(): ?string
     {
-        // Return number of records
         return (string) HealthReason::count();
     }
-
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Health Reason')
-                    ->required()
-                    ->maxLength(255),
+                Grid::make(2)->schema([
+                    TextInput::make('name')
+                        ->label('Health Reason')
+                        ->required()
+                        ->maxLength(255),
 
-                Forms\Components\Toggle::make('is_active')
-                    ->label('Active')
-                    ->default(true),
+                    ToggleButtons::make('is_active')
+                        ->label('Status')
+                        ->options([
+                            1 => 'Active',
+                            0 => 'Inactive',
+                        ])
+                        ->colors([
+                            1 => 'success',
+                            0 => 'danger',
+                        ])
+                        ->inline()
+                        ->default(1),
+                ]),
             ]);
     }
 
@@ -44,22 +60,41 @@ class HealthReasonResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')->sortable(),
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->boolean()
-                    ->label('Active'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime('d M Y H:i'),
+                TextColumn::make('id')->sortable(),
+                TextColumn::make('name')->sortable()->searchable(),
+
+                BadgeColumn::make('is_active')
+                    ->label('Status')
+                    ->getStateUsing(fn ($record) => $record->is_active ? 'Active' : 'Inactive')
+                    ->colors([
+                        'success' => fn ($state) => $state === 'Active',
+                        'danger' => fn ($state) => $state === 'Inactive',
+                    ]),
+
+                TextColumn::make('created_at')
+                    ->dateTime('d M Y H:i')
+                    ->label('Created'),
             ])
             ->filters([])
+            ->headerActions([
+                CreateAction::make()
+                    ->label('New Health Reason')
+                    ->modalHeading('Create Health Reason')
+                    ->modalWidth('lg')
+                    ->createAnother(true),
+            ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make()
+                    ->modalHeading('Edit Health Reason')
+                    ->modalWidth('lg'),
+
+                DeleteAction::make()
+                    ->modalHeading('Delete Health Reason')
+                    ->modalSubheading('Are you sure you want to delete this record?')
+                    ->requiresConfirmation(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 
@@ -71,9 +106,8 @@ class HealthReasonResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListHealthReasons::route('/'),
-            'create' => Pages\CreateHealthReason::route('/create'),
-            'edit'   => Pages\EditHealthReason::route('/{record}/edit'),
+            'index' => Pages\ListHealthReasons::route('/'),
+            // Remove create/edit pages as modals handle them
         ];
     }
 }

@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Gate;
 
 class ScheduledCallResource extends Resource
 {
@@ -26,6 +27,8 @@ class ScheduledCallResource extends Resource
         // Return number of records
         return (string) ScheduledCall::count();
     }
+
+ 
 
     public static function form(Form $form): Form
     {

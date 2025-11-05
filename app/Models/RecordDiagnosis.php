@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class RecordDiagnosis extends Model
 {
     use HasFactory;
+
+        public function record()
+{
+    return $this->belongsTo(Record::class);
+}
 }

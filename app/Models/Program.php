@@ -10,12 +10,12 @@ class Program extends Model
      protected $fillable = [
         'name',
         'description',
-        'isactive',
+        'is_active',
     ];
 
     // Cast isactive to boolean automatically
     protected $casts = [
-        'isactive' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     public function patients()

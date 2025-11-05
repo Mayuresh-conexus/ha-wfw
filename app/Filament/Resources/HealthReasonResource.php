@@ -17,6 +17,7 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
+use Illuminate\Support\Facades\Gate;
 
 class HealthReasonResource extends Resource
 {
@@ -29,6 +30,8 @@ class HealthReasonResource extends Resource
     {
         return (string) HealthReason::count();
     }
+
+
 
     public static function form(Form $form): Form
     {

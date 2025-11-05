@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Forms\Components\FileUpload;
+use Illuminate\Support\Facades\Gate;
 
 
 class PatientResource extends Resource
@@ -31,6 +32,11 @@ class PatientResource extends Resource
     {
         return (string) Patient::count();
     }
+
+    public static function shouldRegisterNavigation(): bool
+{
+    return Gate::allows('view_any_' . static::getModelLabel());
+}
 
     public static function form(Form $form): Form
     {
@@ -89,7 +95,7 @@ class PatientResource extends Resource
 
             TextInput::make('oxygensaturation')->numeric()->label('Oxygen Saturation'),
 
-            ToggleButtons::make('isactive')
+            ToggleButtons::make('is_active')
                 ->label('Status')
                 ->options([1 => 'Active', 0 => 'Inactive'])
                 ->colors([1 => 'success', 0 => 'danger'])
@@ -116,9 +122,9 @@ class PatientResource extends Resource
                 TextColumn::make('name')->sortable()->searchable(),
                 TextColumn::make('filenumber')->sortable()->searchable(),
                 TextColumn::make('mobile'),
-                BadgeColumn::make('isactive')
+                BadgeColumn::make('is_active')
                     ->label('Status')
-                    ->getStateUsing(fn ($record) => $record->isactive ? 'Active' : 'Inactive')
+                    ->getStateUsing(fn ($record) => $record->is_active ? 'Active' : 'Inactive')
                     ->colors([
                         'success' => fn ($state) => $state === 'Active',
                         'danger' => fn ($state) => $state === 'Inactive',

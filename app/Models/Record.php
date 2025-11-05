@@ -6,6 +6,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class Record extends Model
 {
+
+
+    protected $fillable = [
+    'patientid',
+    'doctorid',
+    'volunteerid',
+    'projectid',
+    'programid',
+    'record_type',
+    'notes',
+    'attachments',
+    'status',
+    'submitted_at',
+];
+
+protected $casts = [
+    'attachments' => 'array',
+    'submitted_at' => 'datetime',
+];
+
     public function patient()
     {
         return $this->belongsTo(Patient::class, 'patientid');
@@ -45,4 +65,9 @@ class Record extends Model
     {
         return $this->hasMany(RecordPrescription::class, 'recordid');
     }
+
+    public function calls()
+{
+    return $this->hasMany(ScheduledCall::class, 'recordid');
+}
 }

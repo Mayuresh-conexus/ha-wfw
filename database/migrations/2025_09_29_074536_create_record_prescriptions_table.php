@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('record_prescriptions', function (Blueprint $table) {
             $table->id();
+
+            // Link to parent record
+            $table->foreignId('recordid')
+                ->constrained('records')
+                ->onDelete('cascade');
+
+            // Add your prescription fields
+            $table->string('medicine_name')->nullable();
+            $table->string('dosage')->nullable();
+            $table->string('frequency')->nullable();
+            $table->text('instructions')->nullable();
+
             $table->timestamps();
         });
     }

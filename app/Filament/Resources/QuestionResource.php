@@ -18,6 +18,7 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
+use Illuminate\Support\Facades\Gate;
 
 class QuestionResource extends Resource
 {
@@ -29,6 +30,10 @@ class QuestionResource extends Resource
     {
         return (string) Question::count();
     }
+      public static function shouldRegisterNavigation(): bool
+{
+    return Gate::allows('view_any_' . static::getModelLabel());
+}
 
     public static function form(Form $form): Form
     {

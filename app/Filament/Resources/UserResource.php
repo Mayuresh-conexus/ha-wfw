@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Gate;
 
 class UserResource extends Resource
 {
@@ -21,6 +22,10 @@ class UserResource extends Resource
     {
         return (string) User::count();
     }
+      public static function shouldRegisterNavigation(): bool
+{
+    return Gate::allows('view_any_' . static::getModelLabel());
+}
 
     public static function form(Form $form): Form
     {
@@ -63,17 +68,15 @@ class UserResource extends Resource
             Forms\Components\Select::make('roles')
     ->label('Role')
     ->options(Role::pluck('name', 'name'))
-    ->multiple() // remove if only one role per user
+    ->multiple() // remove if single role per user
     ->required()
     ->afterStateHydrated(function ($component, $state, $record) {
         if ($record) {
             $component->state($record->roles->pluck('name')->toArray());
         }
     })
-    ->dehydrateStateUsing(function ($state, $record) {
-        if ($record) {
-            $record->syncRoles($state);
-        }
+    ->saveRelationshipsUsing(function ($record, $state) {
+        $record->syncRoles($state);
     }),
 
         ]);

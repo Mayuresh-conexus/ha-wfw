@@ -15,6 +15,15 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AnswerResource extends Resource
 {
+    
+
+public static function shouldRegisterNavigation(): bool
+{
+    return false; // Resource won't appear in navigation
+}
+
+
+
     protected static ?string $model = Answer::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-check';

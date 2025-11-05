@@ -21,6 +21,7 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 
 class ProjectResource extends Resource
 {
@@ -32,6 +33,11 @@ class ProjectResource extends Resource
     {
         return (string) Project::count();
     }
+
+      public static function shouldRegisterNavigation(): bool
+{
+    return Gate::allows('view_any_' . static::getModelLabel());
+}
 
     // Optimize table queries with eager loading
     public static function getEloquentQuery(): Builder

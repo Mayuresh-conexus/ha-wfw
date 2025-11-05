@@ -6,16 +6,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('scheduled_calls', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('record_id')->constrained('records');
-            $table->foreignId('volunteer_id')->constrained('users');
-            $table->foreignId('assigned_gp_doctor')->constrained('users');
+
+            // Link to Record
+            $table->foreignId('recordid')
+                ->constrained('records')
+                ->onDelete('cascade');
+
+            // Volunteer user
+            $table->foreignId('volunteer_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null');
+
+            // GP / Doctor user
+            $table->foreignId('assigned_gp_doctor_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null');
+
             $table->date('schedule_date');
             $table->time('schedule_start_time');
             $table->time('schedule_end_time');
@@ -23,13 +35,8 @@ return new class extends Migration
             $table->string('status')->default('scheduled');
             $table->timestamps();
         });
-
-
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('scheduled_calls');

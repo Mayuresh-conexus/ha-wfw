@@ -17,9 +17,11 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Gate;
 class SpecialityResource extends Resource
 {
+
+
     protected static ?string $model = Speciality::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
@@ -30,10 +32,11 @@ class SpecialityResource extends Resource
         return (string) Speciality::count();
     }
     
-    public static function shouldRegisterNavigation(): bool
+      public static function shouldRegisterNavigation(): bool
 {
-    return auth()->user()?->can('view_any_speciality');
+    return Gate::allows('view_any_' . static::getModelLabel());
 }
+ 
     public static function form(Form $form): Form
     {
         return $form
@@ -43,7 +46,7 @@ class SpecialityResource extends Resource
         ->required()
         ->maxLength(255),
 
-    \Filament\Forms\Components\ToggleButtons::make('isactive')
+    \Filament\Forms\Components\ToggleButtons::make('is_active')
         ->label('Status')
         ->options([
             true => 'Active',

@@ -17,6 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
+use Illuminate\Support\Facades\Gate;
 
 class ProgramResource extends Resource
 {
@@ -30,6 +31,11 @@ class ProgramResource extends Resource
         return (string) Program::count();
     }
 
+     public static function shouldRegisterNavigation(): bool
+{
+    return Gate::allows('view_any_' . static::getModelLabel());
+}
+
     public static function form(Form $form): Form
     {
         return $form
@@ -40,7 +46,7 @@ class ProgramResource extends Resource
                         ->required()
                         ->maxLength(255),
 
-                    ToggleButtons::make('isactive')
+                    ToggleButtons::make('is_active')
                         ->label('Status')
                         ->options([
                             1 => 'Active',
@@ -71,9 +77,9 @@ class ProgramResource extends Resource
                     ->limit(50)
                     ->formatStateUsing(fn ($state) => $state ?? '—'),
 
-                BadgeColumn::make('isactive')
+                BadgeColumn::make('is_active')
                     ->label('Status')
-                    ->getStateUsing(fn ($record) => $record->isactive ? 'Active' : 'Inactive')
+                    ->getStateUsing(fn ($record) => $record->is_active == 1 ? 'Active' : 'Inactive')
                     ->colors([
                         'success' => fn ($state) => $state === 'Active',
                         'danger' => fn ($state) => $state === 'Inactive',
@@ -84,7 +90,7 @@ class ProgramResource extends Resource
             ])
             ->filters([
                 Tables\Filters\Filter::make('active')
-                    ->query(fn ($query) => $query->where('isactive', true))
+                    ->query(fn ($query) => $query->where('is_active', true))
                     ->label('Active Programs'),
             ])
             ->headerActions([

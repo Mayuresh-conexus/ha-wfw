@@ -17,6 +17,7 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
+use Illuminate\Support\Facades\Gate;
 
 class BodySectionResource extends Resource
 {
@@ -28,6 +29,7 @@ class BodySectionResource extends Resource
     {
         return (string) BodySection::count();
     }
+
 
     public static function form(Form $form): Form
     {
@@ -44,7 +46,7 @@ class BodySectionResource extends Resource
                     ->maxLength(255),
 
                 Grid::make(2)->schema([
-                    ToggleButtons::make('isactive')
+                    ToggleButtons::make('is_active')
                         ->label('Active')
                         ->options([1 => 'Active', 0 => 'Inactive'])
                         ->colors([1 => 'success', 0 => 'danger'])
@@ -69,9 +71,9 @@ class BodySectionResource extends Resource
                 TextColumn::make('name')->sortable()->searchable(),
                 TextColumn::make('tag')->sortable(),
 
-                BadgeColumn::make('isactive')
+                BadgeColumn::make('is_active')
                     ->label('Active')
-                    ->getStateUsing(fn ($record) => $record->isactive ? 'Active' : 'Inactive')
+                    ->getStateUsing(fn ($record) => $record->is_active ? 'Active' : 'Inactive')
                     ->colors([
                         'success' => fn ($state) => $state === 'Active',
                         'danger' => fn ($state) => $state === 'Inactive',

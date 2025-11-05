@@ -14,6 +14,9 @@ class DatabaseSeeder extends Seeder
     {
        $this->call([
     HealthAdminSetupSeeder::class,
+    CountrySeeder::class,
+    StateSeeder::class,
+    CitySeeder::class
 ]);
     }
 }

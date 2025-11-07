@@ -14,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BooleanColumn;
+use Illuminate\Support\Facades\Gate;
 
 class ProgramResource extends Resource
 {
@@ -28,6 +29,11 @@ class ProgramResource extends Resource
         // Return number of records
         return (string) Program::count();
     }
+
+     public static function shouldRegisterNavigation(): bool
+{
+    return Gate::allows('view_any_' . static::getModelLabel());
+}
 
     public static function form(Form $form): Form
     {

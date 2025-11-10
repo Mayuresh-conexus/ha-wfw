@@ -41,67 +41,80 @@ class RecordResource extends Resource
 
 
 
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-    Forms\Components\Select::make('patientid')
-        ->label('Patient')
-        ->relationship('patient', 'name')
-        ->searchable()
-        ->required(),
+   public static function form(Form $form): Form
+{
+    return $form
+        ->schema([
+            Forms\Components\Select::make('patientid')
+                ->label('Patient')
+                ->relationship('patient', 'name')
+                ->searchable()
+                ->required(),
 
-   Forms\Components\Select::make('doctorid')
-    ->label('Doctor')
-    ->options(function () {
-        return \App\Models\User::role('doctor')
-            ->pluck('name', 'id');
-    })
-    ->searchable()
-    ->preload()
-    ->nullable(),
+            Forms\Components\Select::make('doctorid')
+                ->label('Doctors')
+                ->options(function () {
+                    return \App\Models\User::role('doctor')
+                        ->pluck('name', 'id');
+                })
+                ->searchable()
+                ->preload()
+                ->multiple() // This allows the selection of multiple doctors
+                ->nullable(),
 
-Forms\Components\Select::make('volunteerid')
-    ->label('Volunteer')
-    ->options(function () {
-        return \App\Models\User::role('volunteer')
-            ->pluck('name', 'id');
-    })
-    ->searchable()
-    ->preload()
-    ->nullable(),
+            Forms\Components\Select::make('gpid')
+                ->label('GP')
+                ->options(function () {
+                    return \App\Models\User::role('gp')
+                        ->pluck('name', 'id');
+                })
+                ->searchable()
+                ->preload()
+                ->multiple() // This allows the selection of multiple GPs
+                ->nullable(),
+
+            Forms\Components\Select::make('volunteerid')
+                ->label('Volunteer')
+                ->options(function () {
+                    return \App\Models\User::role('volunteer')
+                        ->pluck('name', 'id');
+                })
+                ->searchable()
+                ->preload()
+                ->nullable(),
+
+            Forms\Components\Select::make('projectid')
+                ->label('Project')
+                ->relationship('project', 'name')
+                ->searchable(),
+
+            Forms\Components\Select::make('programid')
+                ->label('Program')
+                ->relationship('program', 'name')
+                ->searchable(),
+
+            Forms\Components\TextInput::make('record_type')
+                ->label('Record Type'),
+
+            Forms\Components\Textarea::make('notes')
+                ->label('Notes'),
+
+            Forms\Components\FileUpload::make('attachments')
+                ->label('Attachments')
+                ->multiple() // Allows multiple file uploads
+                ->directory('records/attachments'),
+
+            Forms\Components\Select::make('status')
+                ->options([
+                    'draft' => 'Draft',
+                    'submitted' => 'Submitted',
+                    'reviewed' => 'Reviewed',
+                ])
+                ->default('draft'),
+        ]);
+}
 
 
-    Forms\Components\Select::make('projectid')
-        ->label('Project')
-        ->relationship('project', 'name')
-        ->searchable(),
-
-    Forms\Components\Select::make('programid')
-        ->label('Program')
-        ->relationship('program', 'name')
-        ->searchable(),
-
-    Forms\Components\TextInput::make('record_type')
-        ->label('Record Type'),
-
-    Forms\Components\Textarea::make('notes')
-        ->label('Notes'),
-
-    Forms\Components\FileUpload::make('attachments')
-        ->label('Attachments')
-        ->multiple()
-        ->directory('records/attachments'),
-
-    Forms\Components\Select::make('status')
-        ->options([
-            'draft' => 'Draft',
-            'submitted' => 'Submitted',
-            'reviewed' => 'Reviewed',
-        ])
-        ->default('draft'),
-]);
-    }
 
     public static function table(Table $table): Table
     {
@@ -171,4 +184,9 @@ Forms\Components\Select::make('volunteerid')
             'edit' => Pages\EditRecord::route('/{record}/edit'),
         ];
     }
+
+    
+
+
+
 }

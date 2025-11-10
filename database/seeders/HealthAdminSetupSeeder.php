@@ -31,7 +31,18 @@ class HealthAdminSetupSeeder extends Seeder
             'guard_name' => 'web',
         ]);
 
-        // 3️⃣ List all permissions explicitly
+        // 3️⃣ Create doctor and gp roles
+        $doctorRole = Role::create([
+            'name' => 'doctor',
+            'guard_name' => 'web',
+        ]);
+
+        $gpRole = Role::create([
+            'name' => 'gp',
+            'guard_name' => 'web',
+        ]);
+
+        // 4️⃣ List all permissions explicitly
         $permissions = [
             "view_speciality",
             "view_any_speciality",
@@ -131,7 +142,7 @@ class HealthAdminSetupSeeder extends Seeder
             "force_delete_any_question",
         ];
 
-        // 4️⃣ Create permissions
+        // 5️⃣ Create permissions
         foreach ($permissions as $permName) {
             Permission::create([
                 'name' => $permName,
@@ -139,10 +150,10 @@ class HealthAdminSetupSeeder extends Seeder
             ]);
         }
 
-        // 5️⃣ Assign all permissions to admin role
+        // 6️⃣ Assign all permissions to admin role
         $adminRole->syncPermissions(Permission::all());
 
-        // 6️⃣ Create default admin user
+        // 7️⃣ Create default admin user
         $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
@@ -151,9 +162,33 @@ class HealthAdminSetupSeeder extends Seeder
             ]
         );
 
-        // 7️⃣ Assign super_admin role to the admin user
+        // 8️⃣ Assign super_admin role to the admin user
         $admin->syncRoles([$superAdminRole]);
 
-        $this->command->info('✅ Health app admin user, roles, and permissions freshly seeded.');
+        // 9️⃣ Create default doctor user
+        $doctor = User::updateOrCreate(
+            ['email' => 'doctor@example.com'],
+            [
+                'name' => 'doctor',
+                'password' => Hash::make('password'), // Change to secure password
+            ]
+        );
+
+        // 🔟 Assign doctor role to the doctor user
+        $doctor->syncRoles([$doctorRole]);
+
+        // 1️⃣1️⃣ Create default GP user
+        $gp = User::updateOrCreate(
+            ['email' => 'gp@example.com'],
+            [
+                'name' => 'gp',
+                'password' => Hash::make('password'), // Change to secure password
+            ]
+        );
+
+        // 1️⃣2️⃣ Assign GP role to the GP user
+        $gp->syncRoles([$gpRole]);
+
+        $this->command->info('✅ Health app admin, doctor, gp users, roles, and permissions freshly seeded.');
     }
 }

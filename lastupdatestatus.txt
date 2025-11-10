@@ -1,0 +1,5 @@
+Multiple Doctor and GP record are not saving getting error
+
+Array to string conversion
+
+insert into `records` (`patientid`, `doctorid`, `gpid`, `volunteerid`, `projectid`, `programid`, `record_type`, `notes`, `attachments`, `status`, `updated_at`, `created_at`) values (1, ?, ?, 6, 1, 1, Test, Test, [], submitted, 2025-11-07 11:14:06, 2025-11-07 11:14:06)

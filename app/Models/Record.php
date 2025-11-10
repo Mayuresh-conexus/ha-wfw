@@ -11,6 +11,7 @@ class Record extends Model
     protected $fillable = [
     'patientid',
     'doctorid',
+    'gpid',
     'volunteerid',
     'projectid',
     'programid',
@@ -34,6 +35,11 @@ protected $casts = [
     public function doctor()
     {
         return $this->belongsTo(User::class, 'doctorid');
+    }
+
+     public function gp()
+    {
+        return $this->belongsTo(User::class, 'gpid');
     }
 
     public function volunteer()

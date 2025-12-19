@@ -16,6 +16,8 @@ return new class extends Migration
     $table->string('name');
     $table->text('description')->nullable();
     $table->foreignId('cityid')->constrained('cities');
+    $table->json('gpid')->nullable(); // Store multiple GP IDs as JSON
+    $table->foreignId('volunteerid')->nullable()->constrained('users')->onDelete('set null');
     $table->foreignId('stateid')->constrained('states');
     $table->foreignId('countryid')->constrained('countries');
     $table->boolean('isactive')->default(true);

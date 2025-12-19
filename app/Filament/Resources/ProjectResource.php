@@ -69,47 +69,26 @@ class ProjectResource extends Resource
                         ->default(1),
                 ]),
 
-                Textarea::make('description')
-                    ->label('Description')
-                    ->nullable()
-                    ->columnSpanFull(),
+                Forms\Components\Select::make('gpid')
+                ->label('GP')
+                ->options(function () {
+                    return \App\Models\User::role('gp')
+                        ->pluck('name', 'id');
+                })
+                ->searchable()
+                ->preload()
+                ->multiple() // This allows the selection of multiple GPs
+                ->nullable(),
 
-                // Use preload for small tables or searchable for large tables
-                       Select::make('countryid')
-                        ->label('Country')
-                        ->relationship('country', 'name')
-                        ->reactive()
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('stateid', null))
-                        ->required(),
-
-                    Select::make('stateid')
-                        ->label('State')
-                        ->reactive()
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('cityid', null))
-                        ->options(fn (callable $get) => 
-                            $get('countryid') ? \App\Models\State::where('countryid', $get('countryid'))->pluck('name', 'id') : []
-                        )
-                        ->required(),
-
-                    Select::make('cityid')
-                        ->label('City')
-                        ->reactive()
-                        ->options(fn (callable $get) =>
-                            $get('stateid') ? \App\Models\City::where('stateid', $get('stateid'))->pluck('name', 'id') : []
-                        )
-                        ->required(),
-
-
-                Select::make('programid')
-                    ->label('Program')
-                    ->relationship('program', 'name')
-                    ->searchable()
-                    ->nullable(),
-
-                TextInput::make('othercity')
-                    ->label('Other City')
-                    ->nullable()
-                    ->maxLength(255),
+            Forms\Components\Select::make('volunteerid')
+                ->label('Volunteer')
+                ->options(function () {
+                    return \App\Models\User::role('volunteer')
+                        ->pluck('name', 'id');
+                })
+                ->searchable()
+                ->preload()
+                ->nullable(),
 
                 DatePicker::make('startdate')
                     ->label('Start Date')
@@ -123,6 +102,50 @@ class ProjectResource extends Resource
                     ->label('Budget')
                     ->numeric()
                     ->nullable(),
+                
+                Select::make('programid')
+                    ->label('Program')
+                    ->relationship('program', 'name')
+                    ->searchable()
+                    ->nullable(),
+
+                Textarea::make('description')
+                    ->label('Description')
+                    ->nullable()
+                    ->columnSpanFull(),
+
+                // Use preload for small tables or searchable for large tables
+                       Select::make('countryid')
+                        ->label('Country')
+                        ->relationship('country', 'name')
+                        ->reactive()
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('stateid', null))
+                        ->required(),
+
+                Select::make('stateid')
+                        ->label('State')
+                        ->reactive()
+                        ->afterStateUpdated(fn ($state, callable $set) => $set('cityid', null))
+                        ->options(fn (callable $get) => 
+                            $get('countryid') ? \App\Models\State::where('countryid', $get('countryid'))->pluck('name', 'id') : []
+                        )
+                        ->required(),
+
+                Select::make('cityid')
+                        ->label('City')
+                        ->reactive()
+                        ->options(fn (callable $get) =>
+                            $get('stateid') ? \App\Models\City::where('stateid', $get('stateid'))->pluck('name', 'id') : []
+                        )
+                        ->required(),
+
+                TextInput::make('othercity')
+                    ->label('Other City')
+                    ->nullable()
+                    ->maxLength(255),
+
+
+               
             ]);
     }
 

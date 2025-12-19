@@ -13,6 +13,8 @@ class Project extends Model
     protected $fillable = [
         'name',
         'description',
+        'gpid',
+        'volunteerid',
         'cityid',
         'stateid',
         'countryid',
@@ -29,9 +31,22 @@ class Project extends Model
         'startdate' => 'date',
         'enddate' => 'date',
         'budget' => 'double',
+        'gpid' => 'array',
     ];
 
     // Relationships
+
+    public function getGpsAttribute()
+    {
+        $ids = $this->gpid ?? [];
+        return \App\Models\User::whereIn('id', $ids)->get();
+    }
+
+    public function volunteer()
+    {
+        return $this->belongsTo(User::class, 'volunteerid');
+    }
+
     public function city()
     {
         return $this->belongsTo(City::class, 'cityid');

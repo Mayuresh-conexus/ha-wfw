@@ -11,7 +11,7 @@ class Symptom extends Model
 
     protected $fillable = [
         'name',
-        'type',
+        'body_section_id',
         'isactive',
         'tag',
         'iscritical',
@@ -21,4 +21,9 @@ class Symptom extends Model
         'isactive'   => 'boolean',
         'iscritical' => 'boolean',
     ];
+
+    public function bodysection()
+{
+    return $this->belongsTo(BodySection::class, 'body_section_id');
+}
 }

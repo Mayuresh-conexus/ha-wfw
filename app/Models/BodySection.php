@@ -20,4 +20,11 @@ class BodySection extends Model
         'is_active'   => 'boolean',
         'iscritical' => 'boolean',
     ];
+
+    public function symptoms()
+        {
+            return $this->hasMany(Symptom::class, 'body_section_id');
+        }
+
+
 }

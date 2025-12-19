@@ -4,30 +4,24 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateQuestionsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
-       Schema::create('questions', function (Blueprint $table) {
-    $table->id();
-    $table->string('name');
-    $table->boolean('is_active')->default(true);
-    $table->string('questiontype')->nullable();
-    $table->string('answertype')->nullable();
-    $table->string('tags')->nullable();
-    $table->timestamps();
-});
-
+        Schema::create('questions', function (Blueprint $table) {
+            $table->id();
+            $table->string('Symptoms');
+            $table->string('question_text'); // The question
+            $table->json('answers'); // Store answers and next_question_id
+            $table->string('question_index')->nullable(); // Store conditional logic as JSON
+            $table->boolean('is_active')->default(true); // Is the question active?
+            $table->timestamps();
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('questions');
     }
-};
+}
+

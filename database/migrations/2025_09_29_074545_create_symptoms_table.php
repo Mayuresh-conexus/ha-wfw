@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('symptoms', function (Blueprint $table) {
     $table->id();
     $table->string('name');
-    $table->string('type')->nullable();
+    $table->foreignId('body_section_id') // Foreign key to the body_sections table
+                  ->constrained('body_sections')  // References the body_sections table
+                  ->onDelete('cascade'); 
     $table->boolean('is_active')->default(true);
     $table->string('tag')->nullable();
     $table->boolean('iscritical')->default(false);

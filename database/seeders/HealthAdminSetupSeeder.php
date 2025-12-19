@@ -42,6 +42,11 @@ class HealthAdminSetupSeeder extends Seeder
             'guard_name' => 'web',
         ]);
 
+        $volunteerRole = Role::create([
+            'name' => 'volunteer',
+            'guard_name' => 'web',
+        ]);
+
         // 4️⃣ List all permissions explicitly
         $permissions = [
             "view_speciality",

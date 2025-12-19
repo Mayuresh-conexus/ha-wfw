@@ -18,6 +18,7 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Support\Facades\Gate;
+use Filament\Forms\Components\Select;
 
 class SymptomResource extends Resource
 {
@@ -44,10 +45,11 @@ class SymptomResource extends Resource
                     ->required()
                     ->maxLength(255),
 
-                TextInput::make('type')
-                    ->label('Type')
-                    ->nullable()
-                    ->maxLength(255),
+                Select::make('body_section_id') // The name of the column in the symptoms table
+    ->label('Body Sections')
+    ->relationship('bodysection', 'name') // Reference the relationship method 'bodysection' defined in Symptom
+    ->searchable()
+    ->nullable(),
 
                 TextInput::make('tag')
                     ->label('Tag')

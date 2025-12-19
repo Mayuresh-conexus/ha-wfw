@@ -10,16 +10,14 @@ class Question extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'type',
+        'symptoms',
+        'question_text',
+        'answers',
+        'question_index',
         'is_active',
-        'questiontype',
-        'tags'
     ];
 
     protected $casts = [
-        'is_active'   => 'boolean',
+        'answers' => 'array',  // Cast answers to an array
     ];
-    
-
 }

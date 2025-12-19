@@ -58,18 +58,61 @@ class PatientResource extends Resource
                     ->required(),
             ]),
 
-            Grid::make(2)->schema([
-                TextInput::make('height')->numeric(),
-                TextInput::make('weight')->numeric(),
+            
+         Grid::make(2)->schema([
+            Textarea::make('reasonvisit')->label('Reason To Visit'),
+            Textarea::make('familyhealthreason')->label('Family Health Reason'),
             ]),
 
-            Grid::make(2)->schema([
-                ToggleButtons::make('smoke')
-                    ->label('Smoking')
-                    ->options([1 => 'Yes', 0 => 'No'])
-                    ->colors([1 => 'danger', 0 => 'success'])
-                    ->inline()
-                    ->default(0),
+         Grid::make(2)->schema([
+            Textarea::make('generalhealth')->label('General Health'),
+            Textarea::make('medication')->label('Medication'),
+            ]),
+
+         Grid::make(2)->schema([
+           FileUpload::make('generalhealthupload')->label('General Health File'),
+           FileUpload::make('medicationupload')->label('Medication File'),
+            ]),
+
+        Grid::make(2)->schema([
+                TextInput::make('occupation'),
+                Select::make('preferredphysician')
+                    ->options(['Male' => 'Male', 'Female' => 'Female'])
+                    ->label('Preferred Physician')
+                    ->required(),
+            ]),
+
+        Grid::make(2)->schema([
+            Textarea::make('malariatest')->label('Malaria Test'),
+            Textarea::make('hivtest')->label('HIV Test'),
+            ]),
+
+       Grid::make(2)->schema([
+           FileUpload::make('malariatestupload')->label('Malaria Test Upload'),
+           FileUpload::make('hivtestupload')->label('HIV Test Upload'),
+            ]),
+            
+
+            Grid::make(4)->schema([
+                TextInput::make('bp')->label('Blood Pressure'),
+                TextInput::make('heartrate')->label('Heart Rate'),
+                TextInput::make('temperature')->label('Temperature')->numeric(),
+                TextInput::make('oxygensaturation')->numeric()->label('Oxygen Saturation'),
+                
+            ]),
+
+             Grid::make(6)->schema([
+                
+                TextInput::make('height')->numeric(),
+                ToggleButtons::make('heightunit')
+                ->label('Height Unit')
+                ->options(['CM' => 'CM', 'Inch' => 'Inch'])
+                ->inline(),
+                TextInput::make('weight')->numeric(),
+                ToggleButtons::make('weightunit')
+                    ->options(['KG' => 'KG', 'LBS' => 'LBS'])
+                    ->label('Weight Unit')
+                    ->inline(),
 
                 ToggleButtons::make('drinkalcohol')
                     ->label('Drinks Alcohol')
@@ -77,23 +120,20 @@ class PatientResource extends Resource
                     ->colors([1 => 'danger', 0 => 'success'])
                     ->inline()
                     ->default(0),
+                    ToggleButtons::make('smoke')
+                    ->label('Smoking')
+                    ->options([1 => 'CM', 0 => 'No'])
+                    ->colors([1 => 'danger', 0 => 'success'])
+                    ->inline()
+                    ->default(0),
             ]),
 
-            Textarea::make('hobbies')->columnSpanFull(),
-            Textarea::make('reasonvisit')->columnSpanFull()->label('Reason To Visit'),
 
-            Grid::make(3)->schema([
-                TextInput::make('bp')->label('Blood Pressure'),
-                TextInput::make('heartrate')->label('Heart Rate'),
-                TextInput::make('temperature')->label('Temperature')->numeric(),
-            ]),
-
+          
             Grid::make(2)->schema([
-                TextInput::make('occupation'),
-                TextInput::make('preferredphysician')->label('Preferred Physician'),
+                FileUpload::make('profile')->label('Profile Picture'),
+                Textarea::make('additionalcomment')->label('Additional Comment')->rows(3),
             ]),
-
-            TextInput::make('oxygensaturation')->numeric()->label('Oxygen Saturation'),
 
             ToggleButtons::make('is_active')
                 ->label('Status')
@@ -101,17 +141,12 @@ class PatientResource extends Resource
                 ->colors([1 => 'success', 0 => 'danger'])
                 ->inline()
                 ->default(1),
+           
 
-            FileUpload::make('profile')->columnSpanFull(),
+            
+           
+           
 
-            Grid::make(2)->schema([
-            Textarea::make('existingmedicalcondition')->label('Existing Medical Condition'),
-            Textarea::make('existingmedicalhistory')->label('Existing Medical History'),
-            ]),
-            Grid::make(2)->schema([
-            Textarea::make('existingmedication')->label('Existing Medication'),
-            Textarea::make('additionalcomment')->label('Additional Comment'),
-            ]),
         ]);
     }
 

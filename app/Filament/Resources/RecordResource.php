@@ -124,10 +124,28 @@ class RecordResource extends Resource
                 ->label('Patient Name')
                 ->sortable()
                 ->searchable(),
-                Tables\Columns\TextColumn::make('doctor.name')
-                ->label('Doctor Name')
-                ->sortable()
-                ->searchable(),
+              Tables\Columns\TextColumn::make('doctorid')
+    ->label('Doctors')
+    ->formatStateUsing(function ($state, $record) {
+        $ids = $record->doctorid ?? [];
+
+        $ids = is_array($ids) ? $ids : (json_decode($ids, true) ?? []);
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+
+        return \App\Models\User::whereIn('id', $ids)->pluck('name')->implode(', ') ?: '-';
+    }),
+
+Tables\Columns\TextColumn::make('gpid')
+    ->label('GPs')
+    ->formatStateUsing(function ($state, $record) {
+        $ids = $record->gpid ?? [];
+
+        $ids = is_array($ids) ? $ids : (json_decode($ids, true) ?? []);
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+
+        return \App\Models\User::whereIn('id', $ids)->pluck('name')->implode(', ') ?: '-';
+    }),
+
                 Tables\Columns\TextColumn::make('volunteer.name')
                 ->label('Volunteer Name')
                 ->sortable()

@@ -23,6 +23,8 @@ class Record extends Model
 ];
 
 protected $casts = [
+    'doctorid' => 'array',
+    'gpid' => 'array',
     'attachments' => 'array',
     'submitted_at' => 'datetime',
 ];
@@ -32,15 +34,18 @@ protected $casts = [
         return $this->belongsTo(Patient::class, 'patientid');
     }
 
-    public function doctor()
-    {
-        return $this->belongsTo(User::class, 'doctorid');
-    }
+    public function getDoctorsAttribute()
+{
+    $ids = $this->doctorid ?? [];
+    return \App\Models\User::whereIn('id', $ids)->get();
+}
 
-     public function gp()
-    {
-        return $this->belongsTo(User::class, 'gpid');
-    }
+public function getGpsAttribute()
+{
+    $ids = $this->gpid ?? [];
+    return \App\Models\User::whereIn('id', $ids)->get();
+}
+
 
     public function volunteer()
     {

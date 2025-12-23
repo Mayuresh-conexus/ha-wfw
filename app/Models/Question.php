@@ -10,7 +10,7 @@ class Question extends Model
     use HasFactory;
 
     protected $fillable = [
-        'symptoms',
+        'symptomid',
         'question_text',
         'answers',
         'question_index',
@@ -20,4 +20,9 @@ class Question extends Model
     protected $casts = [
         'answers' => 'array',  // Cast answers to an array
     ];
+
+    public function symptom()
+    {
+        return $this->belongsTo(Symptom::class, 'symptomid');
+    }
 }

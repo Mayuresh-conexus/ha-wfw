@@ -10,10 +10,10 @@ class CreateQuestionsTable extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->string('Symptoms');
-            $table->string('question_text'); // The question
+            $table->foreignId('symptomid')->nullable()->constrained('symptoms');
+            $table->text('question_text'); // The question
             $table->json('answers'); // Store answers and next_question_id
-            $table->string('question_index')->nullable(); // Store conditional logic as JSON
+            $table->string('question_index')->nullable(); // Question index
             $table->boolean('is_active')->default(true); // Is the question active?
             $table->timestamps();
         });

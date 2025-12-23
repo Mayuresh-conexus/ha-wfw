@@ -26,4 +26,9 @@ class Symptom extends Model
 {
     return $this->belongsTo(BodySection::class, 'body_section_id');
 }
+
+ public function questions()
+        {
+            return $this->hasMany(Question::class, 'symptomid');
+        }
 }

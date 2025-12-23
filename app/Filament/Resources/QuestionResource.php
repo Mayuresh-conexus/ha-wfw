@@ -19,6 +19,8 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Grid;
 
 class QuestionResource extends Resource
 {
@@ -40,17 +42,15 @@ class QuestionResource extends Resource
     {
         return $form
             ->schema([
-                // Symptom or category (optional)
-                TextInput::make('symptoms')
-                    ->label('Symptom or Category')
-                    ->nullable(),
 
-                // Main question text
-                TextInput::make('question_text')
-                    ->label('Question')
-                    ->required()
-                    ->maxLength(255),
-                
+            Grid::make(3)->schema([
+                // Symptom or category (optional)
+                Select::make('symptomid')
+                ->label('Symptom')
+                ->relationship('symptom', 'name')
+                ->searchable()
+                ->live(),
+
                 TextInput::make('question_index')
                     ->label('Question Index')
                     ->required()
@@ -62,6 +62,17 @@ class QuestionResource extends Resource
                     ->nullable()
                     ->maxLength(255),
 
+                 ]),
+
+                // Main question text
+                RichEditor::make('question_text')
+                ->label('Question')
+                ->required()
+                ->columnSpanFull(),
+
+           
+                
+        
                     
 
                 // Repeater for adding multiple answers with next question selection
@@ -74,12 +85,27 @@ class QuestionResource extends Resource
 
                         // Select next question for this answer
                         Select::make('next_question_id')
-            ->label('Next Question')
-            ->options(Question::all()->pluck('question_text', 'id')->prepend('None (End Flow)', 'false')) // Prepend 'None' option with 'false' value
-            ->nullable() // Allow null values
-            ->default('false') // Set 'false' as the default value
-            ->helperText('Select the next question to display after this answer or select "None (End Flow)" to stop the flow')
-    ])
+    ->label('Next Question')
+    ->options(function (\Filament\Forms\Get $get) {
+        $symptomId = $get('../../symptomid');
+
+        $options = \App\Models\Question::query()
+            ->when($symptomId, fn ($q) => $q->where('symptomid', $symptomId))
+            ->orderBy('id')
+            ->pluck('question_text', 'id')
+            ->toArray();
+
+        return ['none' => 'None (End Flow)'] + $options;
+    })
+    ->default('none')
+    ->nullable()
+    ->dehydrateStateUsing(function ($state) {
+        return $state === 'none' ? false : (int) $state;
+    })
+    ->searchable()
+    ->live()
+    ->helperText('Select the next question for this answer, or choose "None (End Flow)".'),
+                ])
                     ->required()
                     ->columnSpanFull()
                     ->defaultItems(1), // You can define the number of initial items here
@@ -100,7 +126,7 @@ class QuestionResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->sortable(),
-                TextColumn::make('question_text')->sortable()->searchable(),
+                TextColumn::make('symptom.name')->sortable()->searchable(),
                 BadgeColumn::make('is_active')->label('Status'),
                 TextColumn::make('created_at')->dateTime('d M Y H:i')->label('Created'),
             ])

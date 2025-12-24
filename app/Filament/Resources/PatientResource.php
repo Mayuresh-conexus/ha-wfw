@@ -122,7 +122,7 @@ class PatientResource extends Resource
                     ->default(0),
                     ToggleButtons::make('smoke')
                     ->label('Smoking')
-                    ->options([1 => 'CM', 0 => 'No'])
+                    ->options([1 => 'Yes', 0 => 'No'])
                     ->colors([1 => 'danger', 0 => 'success'])
                     ->inline()
                     ->default(0),

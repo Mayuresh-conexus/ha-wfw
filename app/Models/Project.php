@@ -34,6 +34,8 @@ class Project extends Model
         'gpid' => 'array',
     ];
 
+    protected $appends = ['gps'];
+
     // Relationships
 
     public function getGpsAttribute()

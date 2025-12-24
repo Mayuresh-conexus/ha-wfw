@@ -21,16 +21,17 @@ class AuthController extends Controller
         $user = User::where('email', $data['email'])->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['Invalid credentials.'],
-            ]);
-        }
+         
+              return response()->json([
+                'message' => 'Invalid credentials.'
+            ], 401);
+                 }
 
         // Only volunteers can login via mobile
         if (! $user->hasRole('volunteer')) {
-            throw ValidationException::withMessages([
-                'email' => ['Access denied. Only volunteers can log in via mobile app.'],
-            ]);
+            return response()->json([
+        'message' => 'Access denied. Only volunteers can log in via mobile app.'
+    ], 403);
         }
 
         // Single-login policy: remove old tokens BEFORE creating new one

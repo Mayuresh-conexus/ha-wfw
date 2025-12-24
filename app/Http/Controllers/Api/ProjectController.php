@@ -9,20 +9,21 @@ use Illuminate\Http\Request;
 class ProjectController extends Controller
 {
     public function index()
-    {
-        $projects = Project::query()
-            ->with([
-                'program:id,name',
-                'country:id,name',
-                'state:id,name',
-                'city:id,name',
-               
-            ])
-            ->latest()
-            ->get();
+{
+    $projects = Project::query()
+        ->with([
+            'program:id,name',
+            'country:id,name',
+            'state:id,name',
+            'city:id,name',
+        ])
+        ->where('volunteerid', auth()->id())
+        ->latest()
+        ->get();
 
-        return response()->json(['data' => $projects]);
-    }
+    return response()->json(['data' => $projects]);
+}
+
 
     public function store(Request $request)
     {

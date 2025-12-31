@@ -56,9 +56,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/flow/symptoms', [FlowController::class, 'symptoms']);
         Route::get('/flow/questions/first/{symptomId}', [FlowController::class, 'firstQuestion']);
         Route::post('/flow/questions/next', [FlowController::class, 'nextQuestion']);
-
+        // Programs
+        Route::get('/programs/list', [ProgramController::class, 'list']);
         //resourses should be last otherwise it may override other routes
-        Route::apiResource('programs', ProgramController::class);
-        Route::apiResource('projects', ProjectController::class);
+        // Route::apiResource('programs', ProgramController::class);
+        // Route::apiResource('projects', ProjectController::class);
     });
 });

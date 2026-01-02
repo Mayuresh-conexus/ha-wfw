@@ -9,7 +9,7 @@ class ScheduledCall extends Model
 {
     use HasFactory;
 
-protected $fillable = [
+    protected $fillable = [
         'recordid',
         'volunteer_id',
         'assigned_gp_doctor_id',
@@ -21,19 +21,22 @@ protected $fillable = [
     ];
 
 
-public function record()
-{
-    return $this->belongsTo(Record::class, 'recordid');
-}
+    public function record()
+    {
+        return $this->belongsTo(Record::class, 'recordid');
+    }
 
-public function volunteer()
-{
-    return $this->belongsTo(User::class, 'volunteer_id');
-}
+    public function volunteer()
+    {
+        return $this->belongsTo(User::class, 'volunteer_id');
+    }
 
-public function doctor()
-{
-    return $this->belongsTo(User::class, 'assigned_gp_doctor_id');
-}
-
+    public function doctor()
+    {
+        return $this->belongsTo(User::class, 'assigned_gp_doctor_id');
+    }
+    public function assignedDoctor()
+    {
+        return $this->belongsTo(User::class, 'assigned_gp_doctor_id');
+    }
 }

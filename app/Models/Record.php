@@ -85,4 +85,13 @@ class Record extends Model
     {
         return $this->hasMany(ScheduledCall::class, 'recordid');
     }
+    public function scheduledCall()
+    {
+        return $this->hasOne(ScheduledCall::class, 'recordid');
+    }
+
+    public function assignedDoctor()
+    {
+        return $this->belongsTo(User::class, 'assigned_gp_doctor_id');
+    }
 }

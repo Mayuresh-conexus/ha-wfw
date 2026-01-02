@@ -46,6 +46,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/records', [RecordController::class, 'store']);
         Route::post('/records/{record}', [RecordController::class, 'update']);
         Route::get('/records/by-patient/{patientId}', [RecordController::class, 'byPatient']);
+        Route::get('/records/by-project/{projectId}', [RecordController::class, 'byProject']); // New
 
         // Support APIs for dropdowns
         Route::get('/records/doctors', [RecordController::class, 'doctors']);

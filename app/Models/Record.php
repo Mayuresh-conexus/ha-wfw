@@ -9,25 +9,29 @@ class Record extends Model
 
 
     protected $fillable = [
-    'patientid',
-    'doctorid',
-    'gpid',
-    'volunteerid',
-    'projectid',
-    'programid',
-    'record_type',
-    'notes',
-    'attachments',
-    'status',
-    'submitted_at',
-];
+        'patientid',
+        'doctorid',
+        'gpid',
+        'volunteerid',
+        'projectid',
+        'programid',
+        'symptom_ids',
+        'question_summary',
+        'record_type',
+        'notes',
+        'attachments',
+        'status',
+        'submitted_at',
+    ];
 
-protected $casts = [
-    'doctorid' => 'array',
-    'gpid' => 'array',
-    'attachments' => 'array',
-    'submitted_at' => 'datetime',
-];
+    protected $casts = [
+        'doctorid' => 'array',
+        'gpid' => 'array',
+        'attachments' => 'array',
+        'symptom_ids' => 'array',         // ← ADD THIS
+        'question_summary' => 'array',    // ← ADD THIS (for consistency)
+        'submitted_at' => 'datetime',
+    ];
 
     public function patient()
     {
@@ -35,16 +39,16 @@ protected $casts = [
     }
 
     public function getDoctorsAttribute()
-{
-    $ids = $this->doctorid ?? [];
-    return \App\Models\User::whereIn('id', $ids)->get();
-}
+    {
+        $ids = $this->doctorid ?? [];
+        return \App\Models\User::whereIn('id', $ids)->get();
+    }
 
-public function getGpsAttribute()
-{
-    $ids = $this->gpid ?? [];
-    return \App\Models\User::whereIn('id', $ids)->get();
-}
+    public function getGpsAttribute()
+    {
+        $ids = $this->gpid ?? [];
+        return \App\Models\User::whereIn('id', $ids)->get();
+    }
 
 
     public function volunteer()
@@ -78,7 +82,7 @@ public function getGpsAttribute()
     }
 
     public function calls()
-{
-    return $this->hasMany(ScheduledCall::class, 'recordid');
-}
+    {
+        return $this->hasMany(ScheduledCall::class, 'recordid');
+    }
 }

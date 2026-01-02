@@ -34,9 +34,9 @@ class PatientResource extends Resource
     }
 
     public static function shouldRegisterNavigation(): bool
-{
-    return Gate::allows('view_any_' . static::getModelLabel());
-}
+    {
+        return Gate::allows('view_any_' . static::getModelLabel());
+    }
 
     public static function form(Form $form): Form
     {
@@ -58,23 +58,23 @@ class PatientResource extends Resource
                     ->required(),
             ]),
 
-            
-         Grid::make(2)->schema([
-            Textarea::make('reasonvisit')->label('Reason To Visit'),
-            Textarea::make('familyhealthreason')->label('Family Health Reason'),
+
+            Grid::make(2)->schema([
+                Textarea::make('reasonvisit')->label('Reason To Visit'),
+                Textarea::make('familyhealthreason')->label('Family Health Reason'),
             ]),
 
-         Grid::make(2)->schema([
-            Textarea::make('generalhealth')->label('General Health'),
-            Textarea::make('medication')->label('Medication'),
+            Grid::make(2)->schema([
+                Textarea::make('generalhealth')->label('General Health'),
+                Textarea::make('medication')->label('Medication'),
             ]),
 
-         Grid::make(2)->schema([
-           FileUpload::make('generalhealthupload')->label('General Health File'),
-           FileUpload::make('medicationupload')->label('Medication File'),
+            Grid::make(2)->schema([
+                FileUpload::make('generalhealthupload')->label('General Health File'),
+                FileUpload::make('medicationupload')->label('Medication File'),
             ]),
 
-        Grid::make(2)->schema([
+            Grid::make(2)->schema([
                 TextInput::make('occupation'),
                 Select::make('preferredphysician')
                     ->options(['Male' => 'Male', 'Female' => 'Female'])
@@ -82,32 +82,32 @@ class PatientResource extends Resource
                     ->required(),
             ]),
 
-        Grid::make(2)->schema([
-            Textarea::make('malariatest')->label('Malaria Test'),
-            Textarea::make('hivtest')->label('HIV Test'),
+            Grid::make(2)->schema([
+                Textarea::make('malariatest')->label('Malaria Test'),
+                Textarea::make('hivtest')->label('HIV Test'),
             ]),
 
-       Grid::make(2)->schema([
-           FileUpload::make('malariatestupload')->label('Malaria Test Upload'),
-           FileUpload::make('hivtestupload')->label('HIV Test Upload'),
+            Grid::make(2)->schema([
+                FileUpload::make('malariatestupload')->label('Malaria Test Upload'),
+                FileUpload::make('hivtestupload')->label('HIV Test Upload'),
             ]),
-            
+
 
             Grid::make(4)->schema([
                 TextInput::make('bp')->label('Blood Pressure'),
                 TextInput::make('heartrate')->label('Heart Rate'),
                 TextInput::make('temperature')->label('Temperature')->numeric(),
                 TextInput::make('oxygensaturation')->numeric()->label('Oxygen Saturation'),
-                
+
             ]),
 
-             Grid::make(6)->schema([
-                
+            Grid::make(6)->schema([
+
                 TextInput::make('height')->numeric(),
                 ToggleButtons::make('heightunit')
-                ->label('Height Unit')
-                ->options(['CM' => 'CM', 'Inch' => 'Inch'])
-                ->inline(),
+                    ->label('Height Unit')
+                    ->options(['CM' => 'CM', 'Inch' => 'Inch'])
+                    ->inline(),
                 TextInput::make('weight')->numeric(),
                 ToggleButtons::make('weightunit')
                     ->options(['KG' => 'KG', 'LBS' => 'LBS'])
@@ -120,7 +120,7 @@ class PatientResource extends Resource
                     ->colors([1 => 'danger', 0 => 'success'])
                     ->inline()
                     ->default(0),
-                    ToggleButtons::make('smoke')
+                ToggleButtons::make('smoke')
                     ->label('Smoking')
                     ->options([1 => 'Yes', 0 => 'No'])
                     ->colors([1 => 'danger', 0 => 'success'])
@@ -129,7 +129,7 @@ class PatientResource extends Resource
             ]),
 
 
-          
+
             Grid::make(2)->schema([
                 FileUpload::make('profile')->label('Profile Picture'),
                 Textarea::make('additionalcomment')->label('Additional Comment')->rows(3),
@@ -141,11 +141,11 @@ class PatientResource extends Resource
                 ->colors([1 => 'success', 0 => 'danger'])
                 ->inline()
                 ->default(1),
-           
 
-            
-           
-           
+
+
+
+
 
         ]);
     }
@@ -159,10 +159,10 @@ class PatientResource extends Resource
                 TextColumn::make('mobile'),
                 BadgeColumn::make('is_active')
                     ->label('Status')
-                    ->getStateUsing(fn ($record) => $record->is_active ? 'Active' : 'Inactive')
+                    ->getStateUsing(fn($record) => $record->is_active ? 'Active' : 'Inactive')
                     ->colors([
-                        'success' => fn ($state) => $state === 'Active',
-                        'danger' => fn ($state) => $state === 'Inactive',
+                        'success' => fn($state) => $state === 'Active',
+                        'danger' => fn($state) => $state === 'Inactive',
                     ]),
                 TextColumn::make('dob')->date(),
             ])

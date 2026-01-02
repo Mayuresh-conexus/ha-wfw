@@ -6,8 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Patient extends Model
 {
-
- protected $fillable = [
+    protected $fillable = [
         'name',
         'filenumber',
         'email',
@@ -23,6 +22,7 @@ class Patient extends Model
         'generalhealth',
         'generalhealthupload',
         'reasonvisit',
+        'reasontovisit',
         'bp',
         'heartrate',
         'temperature',
@@ -39,6 +39,14 @@ class Patient extends Model
         'hivtest',
         'hivtestupload',
         'additionalcomment',
+        'programid',
+    ];
+
+    protected $casts = [
+        'smoke' => 'boolean',
+        'drinkalcohol' => 'boolean',
+        'is_active' => 'boolean',
+        // REMOVED array casts — we handle JSON manually
     ];
 
     public function records()
@@ -51,4 +59,3 @@ class Patient extends Model
         return $this->belongsTo(Program::class, 'programid');
     }
 }
-

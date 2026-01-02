@@ -9,20 +9,20 @@ use Illuminate\Http\Request;
 class ProjectController extends Controller
 {
     public function index()
-{
-    $projects = Project::query()
-        ->with([
-            'program:id,name',
-            'country:id,name',
-            'state:id,name',
-            'city:id,name',
-        ])
-        ->where('volunteerid', auth()->id())
-        ->latest()
-        ->get();
+    {
+        $projects = Project::query()
+            ->with([
+                'program:id,name',
+                'country:id,name',
+                'state:id,name',
+                'city:id,name',
+            ])
+            ->where('volunteerid', auth()->id())
+            ->latest()
+            ->get();
 
-    return response()->json(['data' => $projects]);
-}
+        return response()->json(['data' => $projects]);
+    }
 
 
     public function store(Request $request)
@@ -113,5 +113,55 @@ class ProjectController extends Controller
         $project->delete();
 
         return response()->json(['message' => 'Deleted']);
+    }
+    public function byProgram($programId)
+    {
+        // Validate program exists
+        \App\Models\Program::findOrFail($programId);
+
+        $projects = Project::query()
+            ->with([
+                'program:id,name',
+                'country:id,name',
+                'state:id,name',
+                'city:id,name',
+                // Remove 'gps' from here — it's not a relationship
+            ])
+            ->where('programid', $programId)
+            ->where('volunteerid', auth()->id())
+            ->latest()
+            ->get();
+
+        // Manually append gps data if needed (optional)
+        $projects->each(function ($project) {
+            $project->append('gps'); // This adds the accessor to JSON output
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Projects retrieved successfully',
+            'data' => $projects,
+        ]);
+    }
+
+    public function getAllProjects()
+    {
+        $projects = Project::query()
+            ->with([
+                'program:id,name',
+                'country:id,name',
+                'state:id,name',
+                'city:id,name',
+                // 'gps' removed — it's an accessor, not a relationship
+            ])
+            ->where('volunteerid', auth()->id())
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'My projects retrieved successfully',
+            'data' => $projects,
+        ]);
     }
 }

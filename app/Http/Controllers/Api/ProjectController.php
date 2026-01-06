@@ -114,28 +114,25 @@ class ProjectController extends Controller
 
         return response()->json(['message' => 'Deleted']);
     }
+
+
     public function byProgram($programId)
     {
         // Validate program exists
         \App\Models\Program::findOrFail($programId);
 
         $projects = Project::query()
-            ->with([
-                'program:id,name',
-                'country:id,name',
-                'state:id,name',
-                'city:id,name',
-                // Remove 'gps' from here — it's not a relationship
-            ])
             ->where('programid', $programId)
-            ->where('volunteerid', auth()->id())
+            ->select([
+                'id',
+                'name',
+                'description',
+            ])
             ->latest()
-            ->get();
+            ->get()
+            ->makeHidden(['gps']);
 
-        // Manually append gps data if needed (optional)
-        $projects->each(function ($project) {
-            $project->append('gps'); // This adds the accessor to JSON output
-        });
+        
 
         return response()->json([
             'success' => true,

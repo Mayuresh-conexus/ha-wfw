@@ -83,9 +83,9 @@ class SymptomResource extends Resource
                 TextColumn::make('type')->sortable(),
                 TextColumn::make('tag')->sortable(),
 
-                BadgeColumn::make('isactive')
+                BadgeColumn::make('is_active')
                     ->label('Active')
-                    ->getStateUsing(fn ($record) => $record->isactive ? 'Active' : 'Inactive')
+                    ->getStateUsing(fn ($record) => $record->is_active ? 'Active' : 'Inactive')
                     ->colors([
                         'success' => fn ($state) => $state === 'Active',
                         'danger' => fn ($state) => $state === 'Inactive',

@@ -12,13 +12,13 @@ class Symptom extends Model
     protected $fillable = [
         'name',
         'body_section_id',
-        'isactive',
+        'is_active',
         'tag',
         'iscritical',
     ];
 
     protected $casts = [
-        'isactive'   => 'boolean',
+        'is_active'   => 'boolean',
         'iscritical' => 'boolean',
     ];
 

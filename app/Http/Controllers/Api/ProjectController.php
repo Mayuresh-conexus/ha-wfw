@@ -127,6 +127,18 @@ class ProjectController extends Controller
                 'id',
                 'name',
                 'description',
+                'startdate',
+                'enddate',
+                'budget',
+                'countryid',
+                'stateid',
+                'cityid',
+                'othercity',
+            ])
+            ->with([
+                'country:id,name',
+                'state:id,name',
+                'city:id,name',
             ])
             ->latest()
             ->get()

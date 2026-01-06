@@ -80,7 +80,12 @@ class SymptomResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('name')->sortable()->searchable(),
-                TextColumn::make('type')->sortable(),
+                TextColumn::make('body_section_id')->sortable()
+                    ->label('Body Section')
+                    ->formatStateUsing(function ($state) {
+                        $bodySection = \App\Models\BodySection::find($state);
+                        return $bodySection ? $bodySection->name : 'N/A';
+                    }),
                 TextColumn::make('tag')->sortable(),
 
                 BadgeColumn::make('is_active')

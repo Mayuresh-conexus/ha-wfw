@@ -12,11 +12,11 @@ class Speciality extends Model
     // Allow mass assignment
     protected $fillable = [
         'name',
-        'isactive',
+        'is_active',
     ];
 
-    // Cast isactive to boolean
+    // Cast is_active to boolean
     protected $casts = [
-        'isactive' => 'boolean',
+        'is_active' => 'boolean',
     ];
 }

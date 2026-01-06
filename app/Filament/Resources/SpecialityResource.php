@@ -18,9 +18,11 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Filament\Tables\Columns\BadgeColumn;
+
+
 class SpecialityResource extends Resource
 {
-
 
     protected static ?string $model = Speciality::class;
 
@@ -71,7 +73,13 @@ class SpecialityResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('name')->sortable()->searchable(),
-                BooleanColumn::make('isactive')->label('Active')->sortable(),
+                BadgeColumn::make('is_active')
+                    ->label('Status')
+                    ->getStateUsing(fn ($record) => $record->is_active == 1 ? 'Active' : 'Inactive')
+                    ->colors([
+                        'success' => fn ($state) => $state === 'Active',
+                        'danger' => fn ($state) => $state === 'Inactive',
+                    ]),
                 TextColumn::make('created_at')->dateTime()->label('Created'),
                 TextColumn::make('updated_at')->dateTime()->label('Updated'),
             ])

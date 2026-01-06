@@ -126,8 +126,20 @@ class QuestionResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->sortable(),
-                TextColumn::make('symptom.name')->sortable()->searchable(),
-                BadgeColumn::make('is_active')->label('Status'),
+                TextColumn::make('symptom_question')
+                    ->label('Symptom')
+                    ->getStateUsing(function ($record) {
+                        return $record->symptom->name . ' : Q index ' . $record->question_index;
+                    })
+                    ->sortable()
+                    ->searchable(),
+                 BadgeColumn::make('is_active')
+                    ->label('Status')
+                    ->getStateUsing(fn ($record) => $record->is_active ? 'Active' : 'Inactive')
+                    ->colors([
+                        'success' => fn ($state) => $state === 'Active',
+                        'danger' => fn ($state) => $state === 'Inactive',
+                    ]),
                 TextColumn::make('created_at')->dateTime('d M Y H:i')->label('Created'),
             ])
             ->actions([

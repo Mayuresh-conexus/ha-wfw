@@ -134,6 +134,7 @@ class ProjectController extends Controller
                 'stateid',
                 'cityid',
                 'othercity',
+                'is_active',
             ])
             ->with([
                 'country:id,name',

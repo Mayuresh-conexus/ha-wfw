@@ -31,6 +31,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/projects/getAllProjects', [ProjectController::class, 'getAllProjects']);
         // Patient
         Route::get('/patients/by-program/{programId}', [PatientController::class, 'byProgram']);
+        Route::get('/patients/by-id/{patientId}', [PatientController::class, 'byId']); // Get patient by ID
+        Route::get('/patients/list', [PatientController::class, 'list']); // List all patients
         Route::post('/patients', [PatientController::class, 'store']); // Create
         Route::post('/patients/{patient}', [PatientController::class, 'update']); // Update
 

@@ -11,6 +11,82 @@ use Illuminate\Support\Facades\Storage;
 
 class PatientController extends Controller
 {
+        /** Get all petients by petients id */
+
+    public function byId($patientId){
+
+        $patient = Patient::query()
+            ->where('id', $patientId)
+            ->select([
+                'id',
+                'name',
+        'filenumber',
+        'email',
+        'mobile',
+        'dob',
+        'gender',
+        'height',
+        'heightunit',
+        'weight',
+        'weightunit',
+        'smoke',
+        'drinkalcohol',
+        'generalhealth',
+        'generalhealthupload',
+        'reasonvisit',
+        'reasontovisit',
+        'bp',
+        'heartrate',
+        'temperature',
+        'occupation',
+        'preferredphysician',
+        'oxygensaturation',
+        'is_active',
+        'profile',
+        'medication',
+        'medicationupload',
+        'familyhealthreason',
+        'malariatest',
+        'malariatestupload',
+        'hivtest',
+        'hivtestupload',
+        'additionalcomment',
+        'programid',
+
+    ])->first();
+
+        if (!$patient) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Patient not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Patient retrieved successfully',
+            'data' => $patient,
+        ]);
+    }
+
+    public function list(){
+        $patients = Patient::query()
+            ->select([
+                'id',
+                'name',
+                'filenumber',
+
+            ])
+            ->latest()
+            ->get();        
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Patients retrieved successfully',
+            'data' => $patients,
+        ]);
+    }
+
     /**
      * Get all patients for a specific program (filtered by authenticated volunteer)
      */

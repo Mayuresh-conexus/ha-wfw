@@ -18,7 +18,7 @@ class Project extends Model
         'cityid',
         'stateid',
         'countryid',
-        'isactive',
+        'is_active',
         'startdate',
         'enddate',
         'budget',
@@ -27,7 +27,7 @@ class Project extends Model
     ];
 
     protected $casts = [
-        'isactive' => 'boolean',
+        'is_active' => 'boolean',
         'startdate' => 'date',
         'enddate' => 'date',
         'budget' => 'double',

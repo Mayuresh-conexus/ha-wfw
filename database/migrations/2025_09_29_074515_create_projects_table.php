@@ -20,7 +20,7 @@ return new class extends Migration
     $table->foreignId('volunteerid')->nullable()->constrained('users')->onDelete('set null');
     $table->foreignId('stateid')->constrained('states');
     $table->foreignId('countryid')->constrained('countries');
-    $table->boolean('isactive')->default(true);
+    $table->boolean('is_active')->default(true);
     $table->date('startdate')->nullable();
     $table->date('enddate')->nullable();
     $table->double('budget')->nullable();

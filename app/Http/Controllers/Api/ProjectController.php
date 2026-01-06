@@ -29,7 +29,7 @@ class ProjectController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'isactive' => ['required', 'boolean'],
+            'is_active' => ['required', 'boolean'],
 
             'gpid' => ['nullable', 'array'],
             'gpid.*' => ['integer', 'exists:users,id'],
@@ -74,7 +74,7 @@ class ProjectController extends Controller
     {
         $data = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'isactive' => ['sometimes', 'required', 'boolean'],
+            'is_active' => ['sometimes', 'required', 'boolean'],
 
             'gpid' => ['nullable', 'array'],
             'gpid.*' => ['integer', 'exists:users,id'],

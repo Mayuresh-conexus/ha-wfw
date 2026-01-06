@@ -55,7 +55,7 @@ class ProjectResource extends Resource
                         ->required()
                         ->maxLength(255),
 
-                    ToggleButtons::make('isactive')
+                    ToggleButtons::make('is_active')
                         ->label('Status')
                         ->options([
                             1 => 'Active',
@@ -160,9 +160,9 @@ class ProjectResource extends Resource
                 TextColumn::make('country.name')->label('Country')->default('—'),
                 TextColumn::make('program.name')->label('Program')->limit(50)->default('—'),
 
-                BadgeColumn::make('isactive')
+                BadgeColumn::make('is_active')
                     ->label('Status')
-                    ->getStateUsing(fn ($record) => $record->isactive ? 'Active' : 'Inactive')
+                    ->getStateUsing(fn ($record) => $record->is_active ? 'Active' : 'Inactive')
                     ->colors([
                         'success' => fn ($state) => $state === 'Active',
                         'danger' => fn ($state) => $state === 'Inactive',
@@ -175,7 +175,7 @@ class ProjectResource extends Resource
             ])
             ->filters([
                 Tables\Filters\Filter::make('active')
-                    ->query(fn ($query) => $query->where('isactive', true))
+                    ->query(fn ($query) => $query->where('is_active', true))
                     ->label('Active Projects'),
             ])
             ->headerActions([

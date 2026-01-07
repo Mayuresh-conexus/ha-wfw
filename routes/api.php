@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\RecordController;
 use App\Http\Controllers\Api\FlowController;
+use App\Http\Controllers\Api\QuestionBulkUploadController;
 
 
 
@@ -65,6 +66,9 @@ Route::prefix('v1')->group(function () {
 
         //Projects
         Route::get('/projects/by-program/{programId}', [ProjectController::class, 'byProgram']);
+
+        // Bulk Question Upload
+         Route::post('/questions/bulk', [QuestionBulkUploadController::class, 'store']);
 
         // Route::get('/programs/list', [ProgramController::class, 'list']);
         //resourses should be last otherwise it may override other routes

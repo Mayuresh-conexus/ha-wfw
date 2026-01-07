@@ -158,10 +158,6 @@ class PatientResource extends Resource
                 ->default(1),
 
 
-
-
-
-
         ]);
     }
 

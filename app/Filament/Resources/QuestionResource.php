@@ -43,26 +43,34 @@ class QuestionResource extends Resource
         return $form
             ->schema([
 
-            Grid::make(3)->schema([
-                // Symptom or category (optional)
-                Select::make('symptomid')
+            Grid::make(4)->schema([
+            Select::make('gender')
+                ->label('Gender / Category')
+                ->options([
+                    'Male' => 'Male',
+                    'Female' => 'Female',
+                    'Child' => 'Child',
+                ])
+                ->nullable()
+                ->searchable(),
+
+            Select::make('symptomid')
                 ->label('Symptom')
                 ->relationship('symptom', 'name')
                 ->searchable()
                 ->live(),
 
-                TextInput::make('question_index')
-                    ->label('Question Index')
-                    ->required()
-                    ->maxLength(255),
+            TextInput::make('question_index')
+                ->label('Question Index')
+                ->required()
+                ->maxLength(255),
 
-                // Tags to categorize the question
-                TextInput::make('tags')
-                    ->label('Tags')
-                    ->nullable()
-                    ->maxLength(255),
+            TextInput::make('tags')
+                ->label('Tags')
+                ->nullable()
+                ->maxLength(255),
+        ]),
 
-                 ]),
 
                 // Main question text
                 RichEditor::make('question_text')

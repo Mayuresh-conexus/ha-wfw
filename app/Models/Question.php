@@ -12,6 +12,7 @@ class Question extends Model
     protected $fillable = [
         'symptomid',
         'question_text',
+        'gender',
         'answers',
         'question_index',
         'is_active',

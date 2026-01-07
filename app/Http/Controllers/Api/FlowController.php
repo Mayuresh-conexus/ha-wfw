@@ -68,7 +68,6 @@ class FlowController extends Controller
     {
         $validated = $request->validate([
             'current_question_id' => 'required|integer|exists:questions,id',
-            'selected_answer_text' => 'required|string',
         ]);
 
         $currentQuestion = Question::findOrFail($validated['current_question_id']);

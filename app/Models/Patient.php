@@ -46,6 +46,10 @@ class Patient extends Model
         'smoke' => 'boolean',
         'drinkalcohol' => 'boolean',
         'is_active' => 'boolean',
+        'generalhealthupload' => 'array',
+        'medicationupload' => 'array',
+        'malariatestupload' => 'array',
+        'hivtestupload' => 'array',
         // REMOVED array casts — we handle JSON manually
     ];
 

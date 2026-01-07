@@ -70,7 +70,22 @@ class PatientResource extends Resource
             ]),
 
             Grid::make(2)->schema([
-                FileUpload::make('generalhealthupload')->label('General Health File'),
+               FileUpload::make('generalhealthupload')
+    ->label('General Health File')
+    ->disk('public')
+    ->directory(fn (callable $get) => 'patients/' . $get('filenumber'))
+    ->preserveFilenames()
+    ->multiple()
+    ->reorderable()
+    ->appendFiles()
+    ->dehydrateStateUsing(function ($state) {
+        // Ensure DB stores JSON array of paths
+        if (blank($state)) {
+            return [];
+        }
+
+        return array_values($state);
+    }),
                 FileUpload::make('medicationupload')->label('Medication File'),
             ]),
 

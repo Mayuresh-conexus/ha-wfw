@@ -159,28 +159,29 @@ class PatientController extends Controller
      * Helper to generate FULL absolute URLs with APP_URL
      */
     private function getImageUrls($paths, $filenumber, $single = false)
-    {
-        // Get base URL from .env (e.g., http://192.168.1.8:8000)
-        $appUrl = rtrim(env('APP_URL', 'http://localhost'), '/');
-
-        // Full base path including /storage/patients/INxxxx/
-        $baseUrl = $appUrl . '/storage/patients/' . $filenumber . '/';
-
-        if ($single) {
-            return $paths ? $baseUrl . $paths : null;
+        {
+            $appUrl = rtrim(env('APP_URL', 'http://localhost'), '/');
+        
+            if ($single) {
+                // profile is currently stored as filename only in your code
+                // if you keep it as filename: return $paths ? $appUrl . '/storage/patients/' . $filenumber . '/' . $paths : null;
+                // if you also switch profile to store full path, use the same logic as below:
+                return $paths ? $appUrl . '/storage/' . ltrim($paths, '/') : null;
+            }
+        
+            if (!$paths) {
+                return [];
+            }
+        
+            // decode JSON string or accept array
+            $decoded = is_string($paths) ? json_decode($paths, true) : $paths;
+            $decoded = is_array($decoded) ? $decoded : [$paths];
+        
+            return array_map(function ($path) use ($appUrl) {
+                // path is like "patients/IN2382/Frame 7.png"
+                return $appUrl . '/storage/' . ltrim($path, '/');
+            }, $decoded);
         }
-
-        if (!$paths) {
-            return [];
-        }
-
-        // Handle both JSON string and single string
-        $paths = is_string($paths) ? (json_decode($paths, true) ?: [$paths]) : [$paths];
-
-        return array_map(function ($path) use ($baseUrl) {
-            return $baseUrl . $path;
-        }, $paths);
-    }
 
     /**
      * Create a new patient
@@ -245,19 +246,28 @@ class PatientController extends Controller
             $data['profile'] = $fileName;
         }
 
-        // Handle multiple file fields (append)
-        $multiFields = ['generalhealthupload', 'medicationupload', 'malariatestupload', 'hivtestupload'];
-        foreach ($multiFields as $field) {
-            if ($request->hasFile($field)) {
-                $paths = [];
-                foreach ($request->file($field) as $file) {
-                    $fileName = $file->getClientOriginalName();
-                    $file->storeAs($folderPath, $fileName, 'public');
-                    $paths[] = $fileName;
+
+        // Handle multiple file fields (store relative paths)
+            $multiFields = ['generalhealthupload', 'medicationupload', 'malariatestupload', 'hivtestupload'];
+            
+            foreach ($multiFields as $field) {
+                if ($request->hasFile($field)) {
+                    $paths = [];
+            
+                    foreach ($request->file($field) as $file) {
+                        $fileName = $file->getClientOriginalName();
+            
+                        // storeAs returns path only if you capture it via $path; but easiest is to build it yourself
+                        $file->storeAs($folderPath, $fileName, 'public');
+            
+                        // store relative path including folder
+                        $paths[] = $folderPath . '/' . $fileName;   // patients/IN2382/Frame 7.png
+                    }
+            
+                    $data[$field] = $paths;
                 }
-                $data[$field] = json_encode($paths);
             }
-        }
+
 
         $patient = Patient::create($data);
 
@@ -380,24 +390,27 @@ class PatientController extends Controller
 
         // Multiple file fields (append)
         $multiFields = ['generalhealthupload', 'medicationupload', 'malariatestupload', 'hivtestupload'];
+
         foreach ($multiFields as $field) {
             if ($request->hasFile($field)) {
-                // Now $patient->$field is a string (or null) — safe to decode
                 $oldPaths = [];
+        
                 if ($patient->$field) {
                     $decoded = json_decode($patient->$field, true);
                     $oldPaths = is_array($decoded) ? $decoded : [];
                 }
-
+        
                 foreach ($request->file($field) as $file) {
                     $fileName = $file->getClientOriginalName();
                     $file->storeAs($folderPath, $fileName, 'public');
-                    $oldPaths[] = $fileName;
+        
+                    $oldPaths[] = $folderPath . '/' . $fileName; // patients/{filenumber}/{filename}
                 }
-
-                $updateData[$field] = json_encode(array_unique($oldPaths));
+        
+                $updateData[$field] = array_values(array_unique($oldPaths));
             }
         }
+
 
         if (empty($updateData)) {
             return response()->json([

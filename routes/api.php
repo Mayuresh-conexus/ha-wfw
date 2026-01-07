@@ -58,7 +58,7 @@ Route::prefix('v1')->group(function () {
         // Questionnaire Flow APIs
         Route::get('/flow/symptoms', [FlowController::class, 'symptoms']);
         Route::get('/flow/questions/first/{symptomId}', [FlowController::class, 'firstQuestion']);
-        Route::post('/flow/questions/next', [FlowController::class, 'nextQuestion']);
+        Route::post('/flow/questions/next', [FlowController::class, 'getQuestionById']);
 
         // Programs
         Route::apiResource('programs', ProgramController::class);

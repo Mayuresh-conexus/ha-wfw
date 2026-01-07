@@ -61,70 +61,32 @@ class FlowController extends Controller
      * POST /api/v1/flow/questions/next
      * Body: {
      *   "current_question_id": 2,
-     *   "selected_answer_text": "No, I am more forgetful than this."
      * }
      */
-    public function nextQuestion(Request $request)
-    {
-        $validated = $request->validate([
-            'current_question_id' => 'required|integer|exists:questions,id',
-        ]);
+   public function getQuestion(Request $request)
+{
+    $validated = $request->validate([
+        'current_question_id' => 'required|integer|exists:questions,id',
+    ]);
 
-        $currentQuestion = Question::findOrFail($validated['current_question_id']);
+    $question = Question::query()
+        ->where('id', $validated['current_question_id'])
+        ->where('is_active', 1)
+        ->select('id', 'question_text', 'answers')
+        ->first();
 
-        // Now $currentQuestion->answers is already an array thanks to $casts
-        $answers = $currentQuestion->answers;
-
-        if (!is_array($answers)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid answers format.',
-            ], 500);
-        }
-
-        // Find the selected answer (with trimming to be safe)
-        $selectedAnswer = collect($answers)->first(function ($answer) use ($validated) {
-            return trim($answer['answer']) === trim($validated['selected_answer_text']);
-        });
-
-        if (!$selectedAnswer) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Selected answer not found.',
-                'available_answers' => collect($answers)->pluck('answer')->toArray(),
-            ], 400);
-        }
-
-        $nextQuestionId = $selectedAnswer['next_question_id'];
-
-        // Check if flow ends
-        if ($nextQuestionId === false || $nextQuestionId === null || $nextQuestionId === 'false') {
-            return response()->json([
-                'success' => true,
-                'message' => 'End of questionnaire for this symptom.',
-                'data' => null,
-                'is_end' => true,
-            ]);
-        }
-
-        // Fetch next question
-        $nextQuestion = Question::where('id', $nextQuestionId)
-            ->where('is_active', 1)
-            ->select('id', 'question_text', 'answers')
-            ->first();
-
-        if (!$nextQuestion) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Next question not found or inactive.',
-            ], 404);
-        }
-
+    if (!$question) {
         return response()->json([
-            'success' => true,
-            'message' => 'Next question retrieved',
-            'data' => $nextQuestion,
-            'is_end' => false,
-        ]);
+            'success' => false,
+            'message' => 'Question not found or inactive.',
+        ], 404);
     }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Question retrieved successfully.',
+        'data' => $question,
+    ]);
+}
+
 }

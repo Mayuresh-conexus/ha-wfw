@@ -63,24 +63,16 @@ class FlowController extends Controller
      *   "current_question_id": 2,
      * }
      */
-   public function getQuestion(Request $request)
+   public function getQuestionById(Request $request)
 {
     $validated = $request->validate([
-        'current_question_id' => 'required|integer|exists:questions,id',
+        'question_id' => 'required|integer|exists:questions,id',
     ]);
 
     $question = Question::query()
-        ->where('id', $validated['current_question_id'])
-        ->where('is_active', 1)
+        ->where('id', $validated['question_id'])
         ->select('id', 'question_text', 'answers')
         ->first();
-
-    if (!$question) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Question not found or inactive.',
-        ], 404);
-    }
 
     return response()->json([
         'success' => true,
@@ -88,5 +80,6 @@ class FlowController extends Controller
         'data' => $question,
     ]);
 }
+
 
 }

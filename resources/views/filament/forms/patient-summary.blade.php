@@ -17,7 +17,6 @@
     $hivFiles = $data['hivFiles'] ?? [];
 @endphp
 
-
 @if (!$patient)
     <div class="text-sm text-gray-500">Select a patient to view summary.</div>
 @else
@@ -34,86 +33,143 @@
         ];
     @endphp
 
-    <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-6">
-            <div class="md:col-span-1">
-                @if ($profileUrl)
-                    <a href="{{ $profileUrl }}" target="_blank" rel="noopener noreferrer">
-                        <img src="{{ $profileUrl }}" alt="Profile" class="h-24 w-24 rounded-lg object-cover">
-                    </a>
-                @else
-                    <div
-                        class="flex h-24 w-24 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                        No Image
+    <div class="rounded-xl bg-white ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800">
+        <div class="p-4 sm:p-6">
+
+            <!-- Header -->
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-4">
+                <div class="flex items-start gap-4">
+                    <div class="shrink-0">
+                        @if ($profileUrl)
+                            <a href="{{ $profileUrl }}" target="_blank" rel="noopener noreferrer" class="block">
+                                <img src="{{ $profileUrl }}" alt="Profile"
+                                    class="h-16 w-16 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-gray-800 sm:h-20 sm:w-20">
+                            </a>
+                        @else
+                            <div
+                                class="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-50 text-[11px] text-gray-500 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700 sm:h-20 sm:w-20">
+                                No Image
+                            </div>
+                        @endif
                     </div>
-                @endif
+
+                    <div class="min-w-0">
+                        <div class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                            Patient Summary
+                        </div>
+
+                        <div
+                            class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600 dark:text-gray-300">
+                            <span class="font-medium text-gray-900 dark:text-gray-100">
+                                File: {{ $patient['filenumber'] ?? '-' }}
+                            </span>
+                            <span class="text-gray-300 dark:text-gray-700">|</span>
+                            <span>Mobile: {{ $patient['mobile'] ?? '-' }}</span>
+                            <span class="text-gray-300 dark:text-gray-700">|</span>
+                            <span>{{ $patient['gender'] ?? '-' }}</span>
+                            <span class="text-gray-300 dark:text-gray-700">|</span>
+                            <span>DOB: {{ $dob }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Optional: quick action (keep if you want) -->
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                    Click attachments to open
+                </div>
             </div>
 
-            <div class="md:col-span-5">
-                <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    <div>
-                        <div class="text-xs font-semibold text-gray-500">File Number</div>
-                        <div class="text-sm">{{ $patient['filenumber'] ?? '-' }}</div>
-                    </div>
+            <!-- Divider -->
+            <hr class="mb-4 border-t border-gray-200 dark:border-gray-800">
 
-                    <div>
-                        <div class="text-xs font-semibold text-gray-500">Mobile</div>
-                        <div class="text-sm">{{ $patient['mobile'] ?? '-' }}</div>
-                    </div>
+            <!-- Notes -->
+            <div class="mt-4 mb-4 grid grid-cols-1 gap-5 md:grid-cols-3 lg:grid-cols-3">
 
-                    <div>
-                        <div class="text-xs font-semibold text-gray-500">Gender</div>
-                        <div class="text-sm">{{ $patient['gender'] ?? '-' }}</div>
+                <div class="space-y-1">
+                    <div class="text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400">
+                        GENERAL HEALTH
                     </div>
-
-                    <div>
-                        <div class="text-xs font-semibold text-gray-500">DOB</div>
-                        <div class="text-sm">{{ $dob }}</div>
+                    <div class="whitespace-pre-line text-sm text-gray-900 dark:text-gray-100">
+                        {{ $patient['generalhealth'] ?? '-' }}
                     </div>
                 </div>
 
-                <div class="mt-4">
-                    <div class="text-xs font-semibold text-gray-500">General Health</div>
-                    <div class="text-sm whitespace-pre-line">{{ $patient['generalhealth'] ?? '-' }}</div>
+                <div class="space-y-1">
+                    <div class="text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400">
+                        MEDICATION
+                    </div>
+                    <div class="whitespace-pre-line text-sm text-gray-900 dark:text-gray-100">
+                        {{ $patient['medication'] ?? '-' }}
+                    </div>
                 </div>
 
-                <div class="mt-4">
-                    <div class="text-xs font-semibold text-gray-500">Medication</div>
-                    <div class="text-sm whitespace-pre-line">{{ $patient['medication'] ?? '-' }}</div>
+                <div class="space-y-1">
+                    <div class="text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400">
+                        ADDITIONAL COMMENT
+                    </div>
+                    <div class="whitespace-pre-line text-sm text-gray-900 dark:text-gray-100">
+                        {{ $patient['additionalcomment'] ?? '-' }}
+                    </div>
                 </div>
 
-                <div class="mt-4">
-                    <div class="text-xs font-semibold text-gray-500">Additional Comment</div>
-                    <div class="text-sm whitespace-pre-line">{{ $patient['additionalcomment'] ?? '-' }}</div>
+            </div>
+
+
+            <!-- Divider -->
+            <hr class="mb-4 border-t border-gray-200 dark:border-gray-800">
+
+            <!-- Attachments -->
+            <div class="mt-4">
+                <div class=" mb-4 items-center justify-between">
+                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        Attachments
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        Opens in new tab
+                    </div>
                 </div>
 
-                <div class="mt-4 space-y-3">
-                    <div class="text-xs font-semibold text-gray-500">Attachments</div>
-
+                <div class="mt-4 mb-4 grid grid-cols-1 gap-x-4 gap-y-3 md:grid-cols-2 lg:grid-cols-4">
                     @foreach ($groups as $title => $files)
-                        <div>
-                            <div class="text-xs font-semibold text-gray-500">{{ $title }}</div>
+                        <div class="rounded-lg bg-gray-50 p-3 ring-1 ring-gray-200 dark:bg-gray-950 dark:ring-gray-800">
+                            <div class="text-xs font-semibold tracking-wide text-gray-600 dark:text-gray-300">
+                                {{ strtoupper($title) }}
+                            </div>
 
                             @if (empty($files))
-                                <div class="text-sm">No files</div>
+                                <div class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                                    No files
+                                </div>
                             @else
-                                <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+                                <div class="mt-2 grid grid-cols-1 gap-x-2 gap-y-1.5 sm:grid-cols-2">
                                     @foreach ($files as $file)
-                                        @php $url = Storage::disk('public')->url($file); @endphp
-                                        <li>
-                                            <a href="{{ $url }}" target="_blank" rel="noopener noreferrer"
-                                                class="text-primary-600 hover:underline">
-                                                {{ basename($file) }}
-                                            </a>
-                                        </li>
+                                        @php
+                                            $url = Storage::disk('public')->url($file);
+                                            $name = basename($file);
+                                            $ext = strtoupper(pathinfo($name, PATHINFO_EXTENSION));
+                                        @endphp
+
+                                        <a href="{{ $url }}" target="_blank" rel="noopener noreferrer"
+                                            class="group flex items-center justify-between gap-2 rounded-md bg-white px-2.5 py-1.5 text-sm ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:ring-gray-800 dark:hover:bg-gray-800"
+                                            title="{{ $name }}">
+                                            <span class="truncate text-gray-800 dark:text-gray-100">
+                                                {{ $name }}
+                                            </span>
+                                            <span
+                                                class="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:ring-gray-700">
+                                                {{ $ext ?: 'FILE' }}
+                                            </span>
+                                        </a>
                                     @endforeach
-                                </ul>
+                                </div>
                             @endif
                         </div>
                     @endforeach
                 </div>
 
+
             </div>
+
         </div>
     </div>
 @endif

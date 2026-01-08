@@ -151,8 +151,7 @@ class PatientResource extends Resource
                 ->disk('public')
                 ->directory(fn (callable $get) => 'patients/' . $get('filenumber'))
                 ->preserveFilenames()
-                ->reorderable()
-                ->appendFiles(),
+                ->visibility('public'),
 
                 Textarea::make('additionalcomment')->label('Additional Comment')->rows(3),
             ]),

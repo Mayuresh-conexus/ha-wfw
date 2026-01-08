@@ -53,16 +53,7 @@ class RecordResource extends Resource
             ->relationship('patient', 'name')
             ->searchable()
             ->required()
-            ->reactive()
-            ->afterStateUpdated(function ($state, Set $set, Get $get) {
-                // Only auto-fill on create (avoid overwriting notes on edit)
-                if ($get('notes')) {
-                    return;
-                }
-
-                $patient = Patient::find($state);
-                $set('notes', $patient?->notes ?? '');
-            }),
+            ->reactive(),
 
             Forms\Components\Select::make('doctorid')
                 ->label('Doctors')
@@ -110,8 +101,8 @@ class RecordResource extends Resource
                 ->label('Record Type'),
 
             Forms\Components\Textarea::make('notes')
-            ->label('Notes')
-            ->rows(5),
+            ->label('Notes'),
+
 
             Forms\Components\FileUpload::make('attachments')
                 ->label('Attachments')
@@ -125,6 +116,21 @@ class RecordResource extends Resource
                     'reviewed' => 'Reviewed',
                 ])
                 ->default('draft'),
+
+
+            Forms\Components\Placeholder::make('patient_additionalcomment')
+            ->label('Patient Additional Comment')
+            ->extraAttributes(['class' => 'whitespace-pre-line'])
+            ->content(function (Get $get) {
+                $patientId = $get('patientid');
+
+                if (! $patientId) {
+                    return 'Select a patient to view additional comment.';
+                }
+
+                return Patient::whereKey($patientId)->value('additionalcomment') ?: '-';
+            }),
+
         ]);
 }
 

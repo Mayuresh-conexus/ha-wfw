@@ -9,6 +9,8 @@ class ScheduledCall extends Model
 {
     use HasFactory;
 
+    protected $table = 'scheduled_calls';
+
     protected $fillable = [
         'recordid',
         'volunteer_id',
@@ -17,6 +19,9 @@ class ScheduledCall extends Model
         'schedule_start_time',
         'schedule_end_time',
         'room_name',
+        'zoom_meeting_id',
+        'zoom_join_url',
+        'zoom_start_url',
         'status',
     ];
 

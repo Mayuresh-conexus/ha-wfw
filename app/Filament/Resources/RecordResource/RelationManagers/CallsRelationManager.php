@@ -8,6 +8,9 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use App\Services\ZoomService;
+use Illuminate\Support\Carbon;
+
 
 class CallsRelationManager extends RelationManager
 {
@@ -72,6 +75,19 @@ class CallsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('schedule_date')->date()->label('Date')->sortable(),
                 Tables\Columns\TextColumn::make('schedule_start_time')->label('Start'),
                 Tables\Columns\TextColumn::make('schedule_end_time')->label('End'),
+                Tables\Columns\TextColumn::make('zoom_join_url')
+                    ->label('Zoom')
+                    ->formatStateUsing(fn ($state) => $state ? 'Join' : '-')
+                    ->url(fn ($record) => $record->zoom_join_url, true)
+                    ->openUrlInNewTab(),
+
+                Tables\Columns\TextColumn::make('zoom_start_url')
+                    ->label('Host')
+                    ->formatStateUsing(fn ($state) => $state ? 'Start' : '-')
+                    ->url(fn ($record) => $record->zoom_start_url, true)
+                    ->openUrlInNewTab()
+                    ->visible(fn () => auth()->user()?->hasRole('admin')),
+
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
                         'warning' => 'scheduled',
@@ -80,16 +96,57 @@ class CallsRelationManager extends RelationManager
                     ]),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->after(function ($record) {
+                        $this->createZoomMeeting($record);
+                    }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->after(function ($record) {
+                        $this->createZoomMeeting($record);
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
+
+
+    protected function createZoomMeeting($record): void
+{
+    $tz = config('app.timezone');
+
+    $start = Carbon::parse($record->schedule_date . ' ' . $record->schedule_start_time, $tz);
+    $end = Carbon::parse($record->schedule_date . ' ' . $record->schedule_end_time, $tz);
+
+    $duration = max(1, $start->diffInMinutes($end));
+
+    $payload = [
+        'topic' => 'Scheduled Call: ' . ($record->room_name ?? 'Call'),
+        'type' => 2,
+        'start_time' => $start->toIso8601String(),
+        'duration' => $duration,
+        'timezone' => $tz,
+        'settings' => [
+            'join_before_host' => true,
+            'waiting_room' => false,
+            'approval_type' => 2,
+        ],
+    ];
+
+    $zoom = app(ZoomService::class);
+    $meeting = $zoom->createMeeting($payload);
+
+    $record->update([
+        'zoom_meeting_id' => (string) ($meeting['id'] ?? null),
+        'zoom_join_url' => $meeting['join_url'] ?? null,
+        'zoom_start_url' => $meeting['start_url'] ?? null,
+    ]);
+}
+
 }

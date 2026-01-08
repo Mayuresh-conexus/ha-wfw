@@ -253,7 +253,7 @@ class PatientController extends Controller
             $file = $request->file('profile');
             $fileName = $file->getClientOriginalName();
             $file->storeAs($folderPath, $fileName, 'public');
-            $data['profile'] = $fileName;
+            $data['profile'] = 'patients/' . $filenumber . '/' . $fileName;
         }
 
 

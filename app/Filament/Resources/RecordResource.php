@@ -18,6 +18,9 @@ use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Gate;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use App\Models\Patient;
 
 
 class RecordResource extends Resource
@@ -46,10 +49,20 @@ class RecordResource extends Resource
     return $form
         ->schema([
             Forms\Components\Select::make('patientid')
-                ->label('Patient')
-                ->relationship('patient', 'name')
-                ->searchable()
-                ->required(),
+            ->label('Patient')
+            ->relationship('patient', 'name')
+            ->searchable()
+            ->required()
+            ->reactive()
+            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                // Only auto-fill on create (avoid overwriting notes on edit)
+                if ($get('notes')) {
+                    return;
+                }
+
+                $patient = Patient::find($state);
+                $set('notes', $patient?->notes ?? '');
+            }),
 
             Forms\Components\Select::make('doctorid')
                 ->label('Doctors')
@@ -97,7 +110,8 @@ class RecordResource extends Resource
                 ->label('Record Type'),
 
             Forms\Components\Textarea::make('notes')
-                ->label('Notes'),
+            ->label('Notes')
+            ->rows(5),
 
             Forms\Components\FileUpload::make('attachments')
                 ->label('Attachments')

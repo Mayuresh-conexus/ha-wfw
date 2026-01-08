@@ -21,6 +21,13 @@ class CallsRelationManager extends RelationManager
     {
         return $form
             ->schema([
+                // Patient dropdown
+                Forms\Components\Select::make('patientid')
+                ->label('Patient')
+                ->options(\App\Models\Patient::pluck('name', 'id'))
+                ->searchable()
+                ->required(),
+
                 // Volunteer dropdown (only users with "volunteer" role)
                 Forms\Components\Select::make('volunteer_id')
                     ->label('Volunteer')
@@ -70,6 +77,11 @@ class CallsRelationManager extends RelationManager
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('patient.name')
+    ->label('Patient')
+    ->sortable()
+    ->searchable(),
+
                 Tables\Columns\TextColumn::make('volunteer.name')->label('Volunteer')->sortable(),
                 Tables\Columns\TextColumn::make('doctor.name')->label('GP / Doctor')->sortable(),
                 Tables\Columns\TextColumn::make('schedule_date')->date()->label('Date')->sortable(),

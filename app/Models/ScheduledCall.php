@@ -12,6 +12,7 @@ class ScheduledCall extends Model
     protected $table = 'scheduled_calls';
 
     protected $fillable = [
+        'patientid',
         'recordid',
         'volunteer_id',
         'assigned_gp_doctor_id',
@@ -44,4 +45,10 @@ class ScheduledCall extends Model
     {
         return $this->belongsTo(User::class, 'assigned_gp_doctor_id');
     }
+
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class, 'patientid');
+    }
+
 }

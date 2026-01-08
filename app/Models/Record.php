@@ -94,4 +94,6 @@ class Record extends Model
     {
         return $this->belongsTo(User::class, 'assigned_gp_doctor_id');
     }
+
+
 }

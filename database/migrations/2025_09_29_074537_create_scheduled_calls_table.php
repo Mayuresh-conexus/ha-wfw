@@ -11,6 +11,10 @@ return new class extends Migration
         Schema::create('scheduled_calls', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('patientid')
+                ->constrained('patients')
+                ->onDelete('cascade');
+
             // Link to Record
             $table->foreignId('recordid')
                 ->constrained('records')
@@ -31,6 +35,9 @@ return new class extends Migration
             $table->date('schedule_date');
             $table->time('schedule_start_time');
             $table->time('schedule_end_time');
+            $table->string('zoom_meeting_id')->nullable();
+            $table->string('zoom_join_url')->nullable();
+            $table->string('zoom_start_url')->nullable();
             $table->string('room_name');
             $table->string('status')->default('scheduled');
             $table->timestamps();

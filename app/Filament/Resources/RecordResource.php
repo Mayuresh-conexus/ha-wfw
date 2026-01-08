@@ -11,16 +11,15 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Gate;
-use Filament\Forms\Get;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\ViewField;
 use Filament\Forms\Set;
+use Filament\Forms\Get;
 use App\Models\Patient;
+
 
 
 class RecordResource extends Resource
@@ -30,59 +29,72 @@ class RecordResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?int $navigationSort = 6;
-     
-      public static function getNavigationBadge(): ?string
+
+    public static function getNavigationBadge(): ?string
     {
-        // Return number of records
         return (string) Record::count();
     }
 
-      public static function shouldRegisterNavigation(): bool
-{
-    return Gate::allows('view_any_' . static::getModelLabel());
-}
+    public static function shouldRegisterNavigation(): bool
+    {
+        return Gate::allows('view_any_' . static::getModelLabel());
+    }
 
-
-
-   public static function form(Form $form): Form
-{
-    return $form
-        ->schema([
+    public static function form(Form $form): Form
+    {
+        return $form->schema([
             Forms\Components\Select::make('patientid')
-            ->label('Patient')
-            ->relationship('patient', 'name')
-            ->searchable()
-            ->required()
-            ->reactive(),
+                ->label('Patient')
+                ->relationship('patient', 'name')
+                ->searchable()
+                ->required()
+                ->live()
+                ->afterStateUpdated(function (Set $set, Get $get) {
+                    self::fillPatientSummary($set, $get);
+                }),
+ 
+
+
+       Section::make('Patient Summary')
+            ->icon('heroicon-o-user-circle')
+            ->schema([
+                ViewField::make('patient_summary')
+                    ->view('filament.forms.patient-summary')
+                    ->default([
+                        'patient' => null,
+                        'generalHealthFiles' => [],
+                        'medicationFiles' => [],
+                        'malariaFiles' => [],
+                        'hivFiles' => [],
+                    ])
+                    ->afterStateHydrated(function (Set $set, Get $get) {
+                        self::fillPatientSummary($set, $get);
+                    })
+                    ->visible(fn (Get $get) => filled($get('patientid')))
+                    ->dehydrated(false),
+            ])
+    ->visible(fn (Get $get) => filled($get('patientid'))),
+
 
             Forms\Components\Select::make('doctorid')
                 ->label('Doctors')
-                ->options(function () {
-                    return \App\Models\User::role('doctor')
-                        ->pluck('name', 'id');
-                })
+                ->options(fn () => \App\Models\User::role('doctor')->pluck('name', 'id'))
                 ->searchable()
                 ->preload()
-                ->multiple() // This allows the selection of multiple doctors
+                ->multiple()
                 ->nullable(),
 
             Forms\Components\Select::make('gpid')
                 ->label('GP')
-                ->options(function () {
-                    return \App\Models\User::role('gp')
-                        ->pluck('name', 'id');
-                })
+                ->options(fn () => \App\Models\User::role('gp')->pluck('name', 'id'))
                 ->searchable()
                 ->preload()
-                ->multiple() // This allows the selection of multiple GPs
+                ->multiple()
                 ->nullable(),
 
             Forms\Components\Select::make('volunteerid')
                 ->label('Volunteer')
-                ->options(function () {
-                    return \App\Models\User::role('volunteer')
-                        ->pluck('name', 'id');
-                })
+                ->options(fn () => \App\Models\User::role('volunteer')->pluck('name', 'id'))
                 ->searchable()
                 ->preload()
                 ->nullable(),
@@ -101,13 +113,13 @@ class RecordResource extends Resource
                 ->label('Record Type'),
 
             Forms\Components\Textarea::make('notes')
-            ->label('Notes'),
-
+                ->label('Notes'),
 
             Forms\Components\FileUpload::make('attachments')
                 ->label('Attachments')
-                ->multiple() // Allows multiple file uploads
-                ->directory('records/attachments'),
+                ->disk('public')
+                ->directory('records/attachments')
+                ->multiple(),
 
             Forms\Components\Select::make('status')
                 ->options([
@@ -116,78 +128,57 @@ class RecordResource extends Resource
                     'reviewed' => 'Reviewed',
                 ])
                 ->default('draft'),
-
-
-            Forms\Components\Placeholder::make('patient_additionalcomment')
-            ->label('Patient Additional Comment')
-            ->extraAttributes(['class' => 'whitespace-pre-line'])
-            ->content(function (Get $get) {
-                $patientId = $get('patientid');
-
-                if (! $patientId) {
-                    return 'Select a patient to view additional comment.';
-                }
-
-                return Patient::whereKey($patientId)->value('additionalcomment') ?: '-';
-            }),
-
         ]);
-}
-
-
+    }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-              Tables\Columns\TextColumn::make('patient.name')
-                ->label('Patient Name')
-                ->sortable()
-                ->searchable(),
-              Tables\Columns\TextColumn::make('doctorid')
-    ->label('Doctors')
-    ->formatStateUsing(function ($state, $record) {
-        $ids = $record->doctorid ?? [];
+                Tables\Columns\TextColumn::make('patient.name')
+                    ->label('Patient Name')
+                    ->sortable()
+                    ->searchable(),
 
-        $ids = is_array($ids) ? $ids : (json_decode($ids, true) ?? []);
-        $ids = array_values(array_filter(array_map('intval', $ids)));
+                Tables\Columns\TextColumn::make('doctorid')
+                    ->label('Doctors')
+                    ->formatStateUsing(function ($state, $record) {
+                        $ids = $record->doctorid ?? [];
+                        $ids = is_array($ids) ? $ids : (json_decode($ids, true) ?? []);
+                        $ids = array_values(array_filter(array_map('intval', $ids)));
 
-        return \App\Models\User::whereIn('id', $ids)->pluck('name')->implode(', ') ?: '-';
-    }),
+                        return \App\Models\User::whereIn('id', $ids)->pluck('name')->implode(', ') ?: '-';
+                    }),
 
-Tables\Columns\TextColumn::make('gpid')
-    ->label('GPs')
-    ->formatStateUsing(function ($state, $record) {
-        $ids = $record->gpid ?? [];
+                Tables\Columns\TextColumn::make('gpid')
+                    ->label('GPs')
+                    ->formatStateUsing(function ($state, $record) {
+                        $ids = $record->gpid ?? [];
+                        $ids = is_array($ids) ? $ids : (json_decode($ids, true) ?? []);
+                        $ids = array_values(array_filter(array_map('intval', $ids)));
 
-        $ids = is_array($ids) ? $ids : (json_decode($ids, true) ?? []);
-        $ids = array_values(array_filter(array_map('intval', $ids)));
-
-        return \App\Models\User::whereIn('id', $ids)->pluck('name')->implode(', ') ?: '-';
-    }),
+                        return \App\Models\User::whereIn('id', $ids)->pluck('name')->implode(', ') ?: '-';
+                    }),
 
                 Tables\Columns\TextColumn::make('volunteer.name')
-                ->label('Volunteer Name')
-                ->sortable()
-                ->searchable(),
+                    ->label('Volunteer Name')
+                    ->sortable()
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('program.name')
-                ->label('Program')
-                ->sortable()
-                ->searchable(),
+                    ->label('Program')
+                    ->sortable()
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('project.name')
-                ->label('Project')
-                ->sortable()
-                ->searchable(),
+                    ->label('Project')
+                    ->sortable()
+                    ->searchable(),
+
                 TextColumn::make('status')->sortable(),
-                
-               
             ])
-            ->filters([
-                //
-            ])
-        
             ->actions([
-                 EditAction::make()
+                EditAction::make()
                     ->modalHeading('Edit Recored')
                     ->modalWidth('lg'),
 
@@ -195,7 +186,6 @@ Tables\Columns\TextColumn::make('gpid')
                     ->modalHeading('Delete Recored')
                     ->modalSubheading('Are you sure you want to delete this record?')
                     ->requiresConfirmation(),
-        
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -207,10 +197,7 @@ Tables\Columns\TextColumn::make('gpid')
     public static function getRelations(): array
     {
         return [
-            RelationManagers\CommentsRelationManager::class,
-            RelationManagers\PrescriptionsRelationManager::class,
             RelationManagers\CallsRelationManager::class,
-            // RelationManagers\DiagnosesRelationManager::class, // Later
         ];
     }
 
@@ -223,7 +210,90 @@ Tables\Columns\TextColumn::make('gpid')
         ];
     }
 
-    
+
+    private static function fillPatientSummary(Set $set, Get $get): void
+{
+    $patientId = $get('patientid');
+
+    if (! $patientId) {
+        $set('patient_summary', [
+            'patient' => null,
+            'generalHealthFiles' => [],
+            'medicationFiles' => [],
+            'malariaFiles' => [],
+            'hivFiles' => [],
+        ]);
+        return;
+    }
+
+    $patient = Patient::query()
+        ->select([
+            'id',
+            'name',
+            'filenumber',
+            'mobile',
+            'gender',
+            'dob',
+            'generalhealth',
+            'medication',
+            'additionalcomment',
+            'profile',
+            'generalhealthupload',
+            'medicationupload',
+            'malariatestupload',
+            'hivtestupload',
+        ])
+        ->find($patientId);
+
+    if (! $patient) {
+        $set('patient_summary', [
+            'patient' => null,
+            'generalHealthFiles' => [],
+            'medicationFiles' => [],
+            'malariaFiles' => [],
+            'hivFiles' => [],
+        ]);
+        return;
+    }
+
+    $generalHealthFiles = is_array($patient->generalhealthupload)
+        ? $patient->generalhealthupload
+        : (json_decode($patient->generalhealthupload ?? '[]', true) ?: []);
+
+    $medicationFiles = is_array($patient->medicationupload)
+        ? $patient->medicationupload
+        : (json_decode($patient->medicationupload ?? '[]', true) ?: []);
+
+    $malariaFiles = is_array($patient->malariatestupload)
+        ? $patient->malariatestupload
+        : (json_decode($patient->malariatestupload ?? '[]', true) ?: []);
+
+    $hivFiles = is_array($patient->hivtestupload)
+        ? $patient->hivtestupload
+        : (json_decode($patient->hivtestupload ?? '[]', true) ?: []);
+
+    $set('patient_summary', [
+        'patient' => [
+            'id' => $patient->id,
+            'name' => $patient->name,
+            'filenumber' => $patient->filenumber,
+            'mobile' => $patient->mobile,
+            'gender' => $patient->gender,
+            'dob' => $patient->dob,
+            'generalhealth' => $patient->generalhealth,
+            'medication' => $patient->medication,
+            'additionalcomment' => $patient->additionalcomment,
+            'profile' => $patient->profile,
+        ],
+        'generalHealthFiles' => $generalHealthFiles,
+        'medicationFiles' => $medicationFiles,
+        'malariaFiles' => $malariaFiles,
+        'hivFiles' => $hivFiles,
+    ]);
+}
+
+
+
 
 
 

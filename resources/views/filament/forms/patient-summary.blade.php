@@ -47,7 +47,7 @@
                             </a>
                         @else
                             <div
-                                class="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-50 text-[11px] text-gray-500 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700 sm:h-20 sm:w-20">
+                                class="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-50 text-xs text-gray-500 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700 sm:h-20 sm:w-20">
                                 No Image
                             </div>
                         @endif

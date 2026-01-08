@@ -146,7 +146,14 @@ class PatientResource extends Resource
 
 
             Grid::make(2)->schema([
-                FileUpload::make('profile')->label('Profile Picture'),
+                FileUpload::make('profile')
+                ->label('Profile Picture')
+                ->disk('public')
+                ->directory(fn (callable $get) => 'patients/' . $get('filenumber'))
+                ->preserveFilenames()
+                ->reorderable()
+                ->appendFiles(),
+
                 Textarea::make('additionalcomment')->label('Additional Comment')->rows(3),
             ]),
 

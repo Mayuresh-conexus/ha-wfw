@@ -29,8 +29,13 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
-            ])
+    'primary' => Color::Teal,     // main brand, buttons, active states
+    'gray'    => Color::Slate,    // neutrals, borders, text hierarchy
+    'info'    => Color::Sky,      // informational states
+    'success' => Color::Emerald,  // success states
+    'warning' => Color::Amber,    // warnings
+    'danger'  => Color::Rose,     // errors, critical
+])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([

@@ -1,7 +1,5 @@
 <?php
 
-n<?php
-
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
@@ -15,9 +13,9 @@ class SmtpTestMail extends Mailable
     public function build()
     {
         return $this->subject('SMTP Test Email')
-                    ->html('
-                        <h2>SMTP Test Successful</h2>
-                        <p>Your Laravel application has successfully sent an email using SMTP.</p>
-                    ');
+            ->html(
+                '<h2>SMTP Test Successful</h2>
+                 <p>Your Laravel application has successfully sent an email using SMTP.</p>'
+            );
     }
 }

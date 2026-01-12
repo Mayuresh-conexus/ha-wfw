@@ -104,7 +104,12 @@
                         <div class="flex flex-wrap gap-2">
                             @foreach ($symptomNames as $s)
                                 <span
-                                    class="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">{{ $s }}</span>
+                                    class="inline-flex items-center rounded-md
+           bg-gray-100 text-gray-800
+           dark:bg-gray-700 dark:text-gray-100
+           px-2 py-0.5 text-xs font-medium">
+                                    {{ $s }}
+                                </span>
                             @endforeach
                         </div>
                     @endif

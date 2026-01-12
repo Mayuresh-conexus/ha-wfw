@@ -201,19 +201,43 @@
                                         @php
                                             $url = Storage::disk('public')->url($file);
                                             $name = basename($file);
-                                            $ext = strtoupper(pathinfo($name, PATHINFO_EXTENSION));
+                                            $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                                            $isImage = in_array($ext, [
+                                                'jpg',
+                                                'jpeg',
+                                                'png',
+                                                'gif',
+                                                'webp',
+                                                'bmp',
+                                                'svg',
+                                            ]);
                                         @endphp
 
                                         <a href="{{ $url }}" target="_blank" rel="noopener noreferrer"
-                                            class="group flex items-center justify-between gap-2 rounded-md bg-white px-2.5 py-1.5 text-sm ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:ring-gray-800 dark:hover:bg-gray-800"
-                                            title="{{ $name }}">
-                                            <span class="truncate text-gray-800 dark:text-gray-100">
+                                            class="group relative block overflow-hidden rounded-md bg-white ring-1 ring-gray-200 hover:ring-gray-300 dark:bg-gray-900 dark:ring-gray-800 dark:hover:ring-gray-600">
+
+                                            @if ($isImage)
+                                                <img src="{{ $url }}" alt="{{ $name }}"
+                                                    loading="lazy"
+                                                    class="h-28 w-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                                            @else
+                                                <div
+                                                    class="flex h-28 flex-col items-center justify-center gap-2 bg-gray-50 dark:bg-gray-800">
+                                                    <span
+                                                        class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                                        {{ strtoupper($ext ?: 'FILE') }}
+                                                    </span>
+                                                    <span
+                                                        class="max-w-[90%] truncate text-xs text-gray-600 dark:text-gray-300">
+                                                        {{ $name }}
+                                                    </span>
+                                                </div>
+                                            @endif
+
+                                            <div
+                                                class="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent px-2 py-1 text-[11px] text-white opacity-0 transition group-hover:opacity-100">
                                                 {{ $name }}
-                                            </span>
-                                            <span
-                                                class="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:ring-gray-700">
-                                                {{ $ext ?: 'FILE' }}
-                                            </span>
+                                            </div>
                                         </a>
                                     @endforeach
                                 </div>

@@ -196,7 +196,7 @@
                                     No files
                                 </div>
                             @else
-                                <div class="mt-2 grid grid-cols-1 gap-x-2 gap-y-1.5 sm:grid-cols-2">
+                                <div class="mt-2 flex flex-wrap gap-2">
                                     @foreach ($files as $file)
                                         @php
                                             $url = Storage::disk('public')->url($file);

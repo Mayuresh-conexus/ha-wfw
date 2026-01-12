@@ -216,12 +216,21 @@ class RecordResource extends Resource
     $patientId = $get('patientid');
 
     if (! $patientId) {
+        $questionSummary = $get('question_summary');
+        $symptomIds = $get('symptom_ids');
+
+        // Normalize JSON stored as string
+        $questionSummary = is_array($questionSummary) ? $questionSummary : (json_decode($questionSummary ?? '[]', true) ?: []);
+        $symptomIds = is_array($symptomIds) ? $symptomIds : (json_decode($symptomIds ?? '[]', true) ?: []);
+
         $set('patient_summary', [
             'patient' => null,
             'generalHealthFiles' => [],
             'medicationFiles' => [],
             'malariaFiles' => [],
             'hivFiles' => [],
+            'question_summary' => $questionSummary,
+            'symptom_ids' => $symptomIds,
         ]);
         return;
     }
@@ -246,12 +255,20 @@ class RecordResource extends Resource
         ->find($patientId);
 
     if (! $patient) {
+        $questionSummary = $get('question_summary');
+        $symptomIds = $get('symptom_ids');
+
+        $questionSummary = is_array($questionSummary) ? $questionSummary : (json_decode($questionSummary ?? '[]', true) ?: []);
+        $symptomIds = is_array($symptomIds) ? $symptomIds : (json_decode($symptomIds ?? '[]', true) ?: []);
+
         $set('patient_summary', [
             'patient' => null,
             'generalHealthFiles' => [],
             'medicationFiles' => [],
             'malariaFiles' => [],
             'hivFiles' => [],
+            'question_summary' => $questionSummary,
+            'symptom_ids' => $symptomIds,
         ]);
         return;
     }
@@ -289,6 +306,8 @@ class RecordResource extends Resource
         'medicationFiles' => $medicationFiles,
         'malariaFiles' => $malariaFiles,
         'hivFiles' => $hivFiles,
+        'question_summary' => is_array($get('question_summary')) ? $get('question_summary') : (json_decode($get('question_summary') ?? '[]', true) ?: []),
+        'symptom_ids' => is_array($get('symptom_ids')) ? $get('symptom_ids') : (json_decode($get('symptom_ids') ?? '[]', true) ?: []),
     ]);
 }
 

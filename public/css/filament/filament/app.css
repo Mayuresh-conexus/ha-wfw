@@ -176,6 +176,10 @@
   background: rgba(var(--med-blue), 0.14);
 }
 
+.fi-sidebar-item-icon {
+    color: #0d9488;
+}
+
 /* ======================================================================
    Filament Logo Medical Branding
    Targets: .fi-logo

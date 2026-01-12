@@ -15,6 +15,8 @@
     $medicationFiles = $data['medicationFiles'] ?? [];
     $malariaFiles = $data['malariaFiles'] ?? [];
     $hivFiles = $data['hivFiles'] ?? [];
+    $questionSummary = $data['question_summary'] ?? [];
+    $symptomIds = $data['symptom_ids'] ?? [];
 @endphp
 
 @if (!$patient)
@@ -31,6 +33,16 @@
             'Malaria Files' => $malariaFiles,
             'HIV Files' => $hivFiles,
         ];
+
+        // Resolve symptom names if IDs provided
+        $symptomNames = [];
+        if (!empty($symptomIds)) {
+            $ids = is_array($symptomIds) ? $symptomIds : (json_decode($symptomIds, true) ?: []);
+            $ids = array_filter(array_map('intval', $ids));
+            if (!empty($ids)) {
+                $symptomNames = \App\Models\Symptom::whereIn('id', $ids)->pluck('name')->toArray();
+            }
+        }
     @endphp
 
     <div class="rounded-xl bg-white ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800">
@@ -82,6 +94,44 @@
             <!-- Divider -->
             <hr class="mb-4 border-t border-gray-200 dark:border-gray-800">
 
+            <!-- Symptoms -->
+            <div class="mt-4 mb-4">
+                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Symptoms</div>
+                <div class="mt-2">
+                    @if (empty($symptomNames))
+                        <div class="text-sm text-gray-500">No symptoms selected</div>
+                    @else
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($symptomNames as $s)
+                                <span
+                                    class="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">{{ $s }}</span>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <hr class="mb-4 border-t border-gray-200 dark:border-gray-800">
+
+            <!-- Question Summary -->
+            <div class="mt-4 mb-4">
+                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">Question Summary</div>
+                <div class="mt-3 space-y-3">
+                    @if (empty($questionSummary))
+                        <div class="text-sm text-gray-500">No question responses</div>
+                    @else
+                        @foreach ($questionSummary as $q)
+                            <div
+                                class="rounded-lg bg-white p-3 ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800">
+                                <div class="text-sm text-gray-700 dark:text-gray-100 mb-1">{!! $q['question_text'] ?? '-' !!}</div>
+                                <div class="text-xs font-semibold text-gray-600 dark:text-gray-300">Answer:
+                                    {{ $q['selected_answer'] ?? '-' }}</div>
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
             <!-- Notes -->
             <div class="mt-4 mb-4 grid grid-cols-1 gap-5 md:grid-cols-3 lg:grid-cols-3">
 

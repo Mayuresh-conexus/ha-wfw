@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-use Illuminate\Support\Facades\Log;
 
 use App\Http\Controllers\Controller;
 use App\Models\Program;
@@ -9,30 +8,19 @@ use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
-    
     public function list()
-{
-    $q = Program::query()
-        ->select('id', 'name', 'is_active')
-        ->where('is_active', 1)
-        ->orderBy('name');
+    {
+        $programs = Program::query()
+            ->select('id', 'name')
+            // ->where('is_active', 1) // Optional: only active programs
+            ->orderBy('name')
+            ->get();
 
-    Log::info('Programs SQL', [
-        'sql' => $q->toSql(),
-        'bindings' => $q->getBindings(),
-    ]);
-
-    $programs = $q->get();
-
-    Log::info('Programs result', $programs->toArray());
-
-    return response()->json([
-        'success' => true,
-        'data' => $programs,
-    ]);
-}
-
-
+        return response()->json([
+            'success' => true,
+            'data' => $programs,
+        ]);
+    }
     public function index()
     {
         return response()->json([

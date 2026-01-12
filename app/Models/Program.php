@@ -15,8 +15,8 @@ class Program extends Model
 
     // Cast isactive to boolean automatically
     protected $casts = [
-    'is_active' => 'integer',
-];
+        'is_active' => 'boolean',
+    ];
 
     public function patients()
     {

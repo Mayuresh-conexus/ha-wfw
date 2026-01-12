@@ -86,7 +86,20 @@ class PatientResource extends Resource
 
         return array_values($state);
     }),
-                FileUpload::make('medicationupload')->label('Medication File'),
+                FileUpload::make('medicationupload')->label('Medication File')
+                ->disk('public')
+                ->directory(fn (callable $get) => 'patients/' . $get('filenumber'))
+                ->preserveFilenames()
+                ->multiple()
+                ->reorderable()
+                ->appendFiles()
+                ->dehydrateStateUsing(function ($state) {
+                    // Ensure DB stores JSON array of paths
+                    if (blank($state)) {
+                        return [];
+                    }
+           return array_values($state);
+    }),
             ]),
 
             Grid::make(2)->schema([
@@ -103,8 +116,34 @@ class PatientResource extends Resource
             ]),
 
             Grid::make(2)->schema([
-                FileUpload::make('malariatestupload')->label('Malaria Test Upload'),
-                FileUpload::make('hivtestupload')->label('HIV Test Upload'),
+                FileUpload::make('malariatestupload')->label('Malaria Test Upload')
+                ->disk('public')
+                ->directory(fn (callable $get) => 'patients/' . $get('filenumber'))
+                ->preserveFilenames()
+                ->multiple()
+                ->reorderable()
+                ->appendFiles()
+                ->dehydrateStateUsing(function ($state) {
+                    // Ensure DB stores JSON array of paths
+                    if (blank($state)) {
+                        return [];
+                    }
+           return array_values($state);
+    }),
+                FileUpload::make('hivtestupload')->label('HIV Test Upload')
+                ->disk('public')
+                ->directory(fn (callable $get) => 'patients/' . $get('filenumber'))
+                ->preserveFilenames()
+                ->multiple()
+                ->reorderable()
+                ->appendFiles()
+                ->dehydrateStateUsing(function ($state) {
+                    // Ensure DB stores JSON array of paths
+                    if (blank($state)) {
+                        return [];
+                    }
+           return array_values($state);
+    }),
             ]),
 
 

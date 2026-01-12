@@ -118,8 +118,18 @@ class RecordResource extends Resource
             Forms\Components\FileUpload::make('attachments')
                 ->label('Attachments')
                 ->disk('public')
-                ->directory('records/attachments')
-                ->multiple(),
+                ->directory(fn (callable $get) => 'patients/signature' . $get('filenumber'))
+                ->preserveFilenames()
+                ->multiple()
+                ->reorderable()
+                ->appendFiles()
+                ->dehydrateStateUsing(function ($state) {
+                    // Ensure DB stores JSON array of paths
+                    if (blank($state)) {
+                        return [];
+                    }
+           return array_values($state);
+    }),
 
             Forms\Components\Select::make('status')
                 ->options([

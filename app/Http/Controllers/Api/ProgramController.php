@@ -11,10 +11,11 @@ class ProgramController extends Controller
     public function list()
     {
         $programs = Program::query()
-            ->select('id', 'name')
-            ->where('is_active', 1)
-            ->orderBy('name')
-            ->get();
+    ->select('id', 'name')
+    ->whereRaw('programs.is_active = 1')
+    ->orderBy('name')
+    ->get();
+
 
         return response()->json([
             'success' => true,

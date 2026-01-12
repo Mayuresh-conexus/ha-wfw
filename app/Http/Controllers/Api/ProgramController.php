@@ -11,7 +11,7 @@ class ProgramController extends Controller
     public function list()
     {
         $programs = Program::query()
-    ->select('id', 'name')
+    ->select('id', 'name', 'is_active')
     ->where('is_active', 1)
     ->orderBy('name')
     ->get();

@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SmtpTestMail;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,4 +18,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect('/admin/login');
+});
+
+
+Route::get('/test-smtp', function () {
+    Mail::to('mayuresh.mhatre@conexus-ns.com')->send(new SmtpTestMail());
+    return 'SMTP test email sent';
 });

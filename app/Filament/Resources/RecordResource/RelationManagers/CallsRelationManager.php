@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\RecordResource\RelationManagers;
 
 use App\Models\User;
+use App\Models\Patient;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CallScheduled;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -159,6 +162,43 @@ class CallsRelationManager extends RelationManager
         'zoom_join_url' => $meeting['join_url'] ?? null,
         'zoom_start_url' => $meeting['start_url'] ?? null,
     ]);
+
+    // Send notification emails to patient, responsible volunteer and assigned GP/doctor
+    try {
+        $emails = [];
+
+        // Patient email
+        if (!empty($record->patientid)) {
+            $patient = Patient::find($record->patientid);
+            if ($patient && !empty($patient->email)) {
+                $emails[] = $patient->email;
+            }
+        }
+
+        // Volunteer email
+        if (!empty($record->volunteer_id)) {
+            $volunteer = User::find($record->volunteer_id);
+            if ($volunteer && !empty($volunteer->email)) {
+                $emails[] = $volunteer->email;
+            }
+        }
+
+        // Assigned GP / Doctor email
+        if (!empty($record->assigned_gp_doctor_id)) {
+            $doctor = User::find($record->assigned_gp_doctor_id);
+            if ($doctor && !empty($doctor->email)) {
+                $emails[] = $doctor->email;
+            }
+        }
+
+        $emails = array_values(array_unique($emails));
+
+        if (!empty($emails)) {
+            Mail::to($emails)->send(new CallScheduled($record));
+        }
+    } catch (\Throwable $e) {
+        // Don't break the flow on mail errors; consider logging in real app
+    }
 }
 
 }

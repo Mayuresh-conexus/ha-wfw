@@ -214,29 +214,23 @@
                                         @endphp
 
                                         <a href="{{ $url }}" target="_blank" rel="noopener noreferrer"
-                                            class="group relative block overflow-hidden rounded-md bg-white ring-1 ring-gray-200 hover:ring-gray-300 dark:bg-gray-900 dark:ring-gray-800 dark:hover:ring-gray-600">
+                                            title="{{ $name }}"
+                                            class="group relative aspect-square w-20 overflow-hidden rounded-md bg-white ring-1 ring-gray-200 hover:ring-gray-300 dark:bg-gray-900 dark:ring-gray-800">
 
                                             @if ($isImage)
                                                 <img src="{{ $url }}" alt="{{ $name }}"
                                                     loading="lazy"
-                                                    class="h-28 w-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                                                    class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110" />
                                             @else
                                                 <div
-                                                    class="flex h-28 flex-col items-center justify-center gap-2 bg-gray-50 dark:bg-gray-800">
-                                                    <span
-                                                        class="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                                                        {{ strtoupper($ext ?: 'FILE') }}
-                                                    </span>
-                                                    <span
-                                                        class="max-w-[90%] truncate text-xs text-gray-600 dark:text-gray-300">
-                                                        {{ $name }}
-                                                    </span>
+                                                    class="flex h-full w-full flex-col items-center justify-center bg-gray-50 text-[10px] font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                                                    {{ strtoupper($ext ?: 'FILE') }}
                                                 </div>
                                             @endif
 
                                             <div
-                                                class="absolute bottom-0 w-full bg-gradient-to-t from-black/70 to-transparent px-2 py-1 text-[11px] text-white opacity-0 transition group-hover:opacity-100">
-                                                {{ $name }}
+                                                class="absolute inset-0 flex items-end bg-black/60 px-1 py-0.5 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
+                                                <span class="truncate">{{ $name }}</span>
                                             </div>
                                         </a>
                                     @endforeach

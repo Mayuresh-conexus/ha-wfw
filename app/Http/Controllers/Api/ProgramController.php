@@ -12,7 +12,7 @@ class ProgramController extends Controller
     {
         $programs = Program::query()
             ->select('id', 'name')
-            ->where('is_active', true)
+            ->where('is_active', '1')
             ->orderBy('name')
             ->get();
 

@@ -12,9 +12,10 @@ class ProgramController extends Controller
     {
         $programs = Program::query()
     ->select('id', 'name')
-    ->whereRaw('is_active = 1')
+    ->where('is_active', 1)
     ->orderBy('name')
     ->get();
+
 
 
         return response()->json([

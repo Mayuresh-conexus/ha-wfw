@@ -118,7 +118,7 @@ class RecordResource extends Resource
             Forms\Components\FileUpload::make('attachments')
                 ->label('Attachments')
                 ->disk('public')
-                ->directory(fn (callable $get) => 'patients/signature' . $get('filenumber'))
+                ->directory(fn (callable $get) => 'patients/' . $get('filenumber') . '/signature')
                 ->preserveFilenames()
                 ->multiple()
                 ->reorderable()

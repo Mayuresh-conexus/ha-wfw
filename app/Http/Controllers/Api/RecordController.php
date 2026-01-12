@@ -54,14 +54,22 @@ class RecordController extends Controller
 
         // Handle attachments
         if ($request->hasFile('attachments')) {
-            $paths = [];
-            foreach ($request->file('attachments') as $file) {
-                $paths[] = $file->store('records/attachments', 'public');
-            }
-            $data['attachments'] = $paths;
-        } else {
-            $data['attachments'] = [];
+        $paths = [];
+
+        $folder = 'patients/signature' . $request->input('filenumber');
+
+        foreach ($request->file('attachments') as $file) {
+            $original = $file->getClientOriginalName();
+
+            // same behavior as preserveFilenames()
+            $paths[] = $file->storeAs($folder, $original, 'public');
         }
+
+        $data['attachments'] = array_values($paths);
+    } else {
+        $data['attachments'] = [];
+    }
+
 
         $record = Record::create($data);
 

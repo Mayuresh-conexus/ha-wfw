@@ -410,7 +410,7 @@ class RecordController extends Controller
                 'city_name'     => $project->city?->name,
                 'state_name'    => $project->city?->state?->name,
                 'country_name'  => $project->city?->state?->country?->name,
-                'is_active'     => (bool) $project->isactive,
+                'is_active'     => (bool) $project->is_active,
                 'start_date'    => $project->startdate?->format('Y-m-d'),
                 'end_date'      => $project->enddate?->format('Y-m-d'),
                 'budget'        => $project->budget,

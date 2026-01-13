@@ -27,4 +27,9 @@ class Program extends Model
     {
         return $this->hasMany(Record::class, 'programid');
     }
+
+    public function projects()
+{
+    return $this->hasMany(Project::class, 'programid'); // use program_id if that is your column
+}
 }

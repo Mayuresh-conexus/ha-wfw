@@ -8,19 +8,24 @@ use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
-    public function list()
-    {
-        $programs = Program::query()
-            ->select('id', 'name')
-            ->where('is_active', 1) // Optional: only active programs
-            ->orderBy('name')
-            ->get();
+    
+public function list()
+{
+    $programs = Program::query()
+        ->select('id', 'name')
+        ->where('is_active', 1)
+        ->withCount('projects')              // adds projects_count
+        ->orderByDesc('projects_count')      // highest first
+        ->orderBy('name')                    // tie breaker
+        ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $programs,
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'data' => $programs,
+    ]);
+}
+
+
     public function index()
     {
         return response()->json([

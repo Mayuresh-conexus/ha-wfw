@@ -62,6 +62,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/flow/questions/next', [FlowController::class, 'getQuestionById']);
 
         // Programs
+        Route::get('/programs/list', [ProgramController::class, 'list']);
         Route::apiResource('programs', ProgramController::class);
 
         //Projects
@@ -70,7 +71,7 @@ Route::prefix('v1')->group(function () {
         // Bulk Question Upload
          Route::post('/questions/bulk', [QuestionBulkUploadController::class, 'store']);
 
-        Route::get('/programs/list', [ProgramController::class, 'list']);
+        
         //resourses should be last otherwise it may override other routes
         // Route::apiResource('projects', ProjectController::class);
     });

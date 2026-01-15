@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\RecordController;
 use App\Http\Controllers\Api\FlowController;
 use App\Http\Controllers\Api\QuestionBulkUploadController;
+use App\Http\Controllers\Api\SymptomBulkController;
 
 
 
@@ -70,6 +71,10 @@ Route::prefix('v1')->group(function () {
 
         // Bulk Question Upload
          Route::post('/questions/bulk', [QuestionBulkUploadController::class, 'store']);
+
+         // Bulk Symptom Upload
+         Route::post('/symptoms/bulk', [SymptomBulkController::class, 'store'])
+    ->name('symptoms.bulk.store');
 
         
         //resourses should be last otherwise it may override other routes

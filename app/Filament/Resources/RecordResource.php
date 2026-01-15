@@ -187,6 +187,7 @@ class RecordResource extends Resource
 
                 TextColumn::make('status')->sortable(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->actions([
                 EditAction::make()
                     ->modalHeading('Edit Recored')

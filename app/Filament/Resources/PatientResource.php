@@ -216,6 +216,7 @@ class PatientResource extends Resource
                     ]),
                 TextColumn::make('dob')->date(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),

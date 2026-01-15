@@ -61,7 +61,7 @@ class StatisticsController extends Controller
                     'cityid' => $project->cityid,
                     'stateid' => $project->stateid,
                     'countryid' => $project->countryid,
-                    'isactive' => $project->isactive,
+                    'isactive' => $project->is_active,
                     'startdate' => $project->startdate,
                     'enddate' => $project->enddate,
                     'budget' => $project->budget,

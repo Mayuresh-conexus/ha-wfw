@@ -55,7 +55,7 @@ class QuestionBulkUploadController extends Controller
                     foreach ($incomingQuestions as $q) {
                         foreach ($q['answers'] ?? [] as $a) {
                             $next = $a['next_question_index'] ?? null;
-                            if ($next && strtoupper($next) !== 'END' && !isset($payloadIndexSet[$next])) {
+                            if ($next && strtoupper($next) !== 'false' && !isset($payloadIndexSet[$next])) {
                                 $errors[] = [
                                     'symptomid' => $symptomId,
                                     'question_index' => $q['question_index'],
@@ -98,7 +98,7 @@ class QuestionBulkUploadController extends Controller
                             $next = $a['next_question_index'] ?? null;
                             $nextId = null;
 
-                            if ($next && strtoupper($next) !== 'END') {
+                            if ($next && strtoupper($next) !== 'false') {
                                 $nextId = $indexToId[$next] ?? null;
                             }
 

@@ -22,7 +22,7 @@ class QuestionBulkUploadController extends Controller
             'symptoms.*.questions.*.is_active' => ['nullable', 'in:0,1'],
             'symptoms.*.questions.*.answers' => ['required', 'array', 'min:1'],
             'symptoms.*.questions.*.answers.*.answer' => ['required', 'string', 'max:255'],
-            'symptoms.*.questions.*.answers.*.next_question_index' => ['nullable', 'string', 'max:255'],
+            'symptoms.*.questions.*.answers.*.next_question_id' => ['nullable', 'string', 'max:255'],
         ]);
 
         $allResults = [];
@@ -69,17 +69,17 @@ class QuestionBulkUploadController extends Controller
                     $indexToId[$q['question_index']] = $question->id;
                 }
 
-                // Update answers (store next_question_index as string, no resolution)
+                // Update answers (store next_question_id as string, no resolution)
                 foreach ($incomingQuestions as $q) {
                     $qid = $indexToId[$q['question_index']];
 
                     $answersToStore = [];
                     foreach ($q['answers'] ?? [] as $a) {
-                        $next = $a['next_question_index'] ?? null;
+                        $next = $a['next_question_id'] ?? null;
 
                         $answersToStore[] = [
                             'answer'             => $a['answer'],
-                            'next_question_index' => $next,  // ← store as string (no ID lookup)
+                            'next_question_id' => $next,  // ← store as string (no ID lookup)
                         ];
                     }
 

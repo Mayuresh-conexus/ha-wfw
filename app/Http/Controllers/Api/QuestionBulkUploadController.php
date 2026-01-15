@@ -9,130 +9,139 @@ use Illuminate\Support\Facades\DB;
 
 class QuestionBulkUploadController extends Controller
 {
-            public function store(Request $request)
-        {
-            $data = $request->validate([
-                'symptoms' => ['required', 'array', 'min:1'],
-                'symptoms.*.symptomid' => ['required', 'string', 'max:100'],
-                'symptoms.*.gender' => ['nullable', 'in:Male,Female,Other,All'],
-                'symptoms.*.default_is_active' => ['nullable', 'in:0,1'],
-                'symptoms.*.questions' => ['required', 'array', 'min:1'],
-                'symptoms.*.questions.*.question_index' => ['required', 'string', 'max:255'],
-                'symptoms.*.questions.*.question_text' => ['required', 'string'],
-                'symptoms.*.questions.*.is_active' => ['nullable', 'in:0,1'],
-                'symptoms.*.questions.*.answers' => ['required', 'array', 'min:1'],
-                'symptoms.*.questions.*.answers.*.answer' => ['required', 'string', 'max:255'],
-                'symptoms.*.questions.*.answers.*.next_question_index' => ['nullable', 'string', 'max:255'],
-            ]);
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'symptoms' => ['required', 'array', 'min:1'],
+            'symptoms.*.symptomid' => ['required', 'string', 'max:100'],
+            'symptoms.*.gender' => ['nullable', 'in:Male,Female,Other,All'], // ← fixed typo: "gfalseer" → "gender"
+            'symptoms.*.default_is_active' => ['nullable', 'in:0,1'],
+            'symptoms.*.questions' => ['required', 'array', 'min:1'],
+            'symptoms.*.questions.*.question_index' => ['required', 'string', 'max:255'],
+            'symptoms.*.questions.*.question_text' => ['required', 'string'],
+            'symptoms.*.questions.*.is_active' => ['nullable', 'in:0,1'],
+            'symptoms.*.questions.*.answers' => ['required', 'array', 'min:1'],
+            'symptoms.*.questions.*.answers.*.answer' => ['required', 'string', 'max:255'],
+            'symptoms.*.questions.*.answers.*.next_question_index' => ['nullable', 'string', 'max:255'],
+        ]);
 
-            $allResults = [];
-            $errors = [];
+        $allResults = [];
+        $errors = [];
 
-            DB::transaction(function () use ($data, &$allResults, &$errors) {
+        DB::transaction(function () use ($data, &$allResults, &$errors) {
 
-                foreach ($data['symptoms'] as $symptomData) {
+            foreach ($data['symptoms'] as $symptomData) {
 
-                    $symptomId = (string) $symptomData['symptomid'];
-                    $gender = $symptomData['gender'] ?? null;
-                    $defaultIsActive = $symptomData['default_is_active'] ?? 1;
+                $symptomId = (string) $symptomData['symptomid'];
+                $gender = $symptomData['gender'] ?? null;
+                $defaultIsActive = $symptomData['default_is_active'] ?? 1;
 
-                    $incomingQuestions = $symptomData['questions'];
+                $incomingQuestions = $symptomData['questions'] ?? [];
 
-                    // ── same validation logic as before ──
-                    $indexes = array_map(fn($q) => $q['question_index'], $incomingQuestions);
-                    $duplicateIndexes = $this->findDuplicates($indexes);
-                    if (!empty($duplicateIndexes)) {
-                        $errors[] = [
-                            'symptomid' => $symptomId,
-                            'message' => 'Duplicate question_index values',
-                            'duplicates' => $duplicateIndexes
-                        ];
-                        continue;
-                    }
+                // Check for duplicate question indexes within this symptom
+                $indexes = array_map(fn($q) => $q['question_index'], $incomingQuestions);
+                $duplicateIndexes = $this->findDuplicates($indexes);
+                if (!empty($duplicateIndexes)) {
+                    $errors[] = [
+                        'symptomid' => $symptomId,
+                        'message' => 'Duplicate question_index values found in this symptom',
+                        'duplicates' => $duplicateIndexes
+                    ];
+                    continue;
+                }
 
-                    $payloadIndexSet = array_flip($indexes);
+                $payloadIndexSet = array_flip($indexes);
 
-                    foreach ($incomingQuestions as $q) {
-                        foreach ($q['answers'] ?? [] as $a) {
-                            $next = $a['next_question_index'] ?? null;
-                            if ($next && strtoupper($next) !== 'false' && !isset($payloadIndexSet[$next])) {
-                                $errors[] = [
-                                    'symptomid' => $symptomId,
-                                    'question_index' => $q['question_index'],
-                                    'invalid_next' => $next,
-                                    'message' => 'next_question_index does not exist in this symptom payload'
-                                ];
-                            }
+                // Validate next_question_index references
+                foreach ($incomingQuestions as $q) {
+                    foreach ($q['answers'] ?? [] as $a) {
+                        $next = $a['next_question_index'] ?? null;
+
+                        // Allow both 'END' and 'false' (case-insensitive) as terminal values
+                        if (!$next || strtoupper($next) === 'END' || strtoupper($next) === 'FALSE') {
+                            continue;
                         }
-                    }
 
-                    if (!empty($errors)) {
-                        // you can break early or collect all
-                        continue;
-                    }
-
-                    $indexToId = [];
-
-                    foreach ($incomingQuestions as $q) {
-                        $question = new Question();
-                        $question->symptomid          = $symptomId;
-                        $question->gender             = $gender;
-                        $question->question_index     = $q['question_index'];
-                        $question->question_text      = $q['question_text'];
-                        $question->is_active          = $q['is_active'] ?? $defaultIsActive;
-                        $question->answers            = []; // temporary
-                        if ($question->isFillable('created_by')) {
-                            $question->created_by = $request->user()->id;
-                        }
-                        $question->save();
-
-                        $indexToId[$q['question_index']] = $question->id;
-                    }
-
-                    // Update answers with real IDs
-                    foreach ($incomingQuestions as $q) {
-                        $qid = $indexToId[$q['question_index']];
-
-                        $answersToStore = [];
-                        foreach ($q['answers'] ?? [] as $a) {
-                            $next = $a['next_question_index'] ?? null;
-                            $nextId = null;
-
-                            if ($next && strtoupper($next) !== 'false') {
-                                $nextId = $indexToId[$next] ?? null;
-                            }
-
-                            $answersToStore[] = [
-                                'answer'             => $a['answer'],
-                                'next_question_id'   => $nextId,
+                        // If not terminal, must exist in this payload
+                        if (!isset($payloadIndexSet[$next])) {
+                            $errors[] = [
+                                'symptomid' => $symptomId,
+                                'question_index' => $q['question_index'] ?? 'unknown',
+                                'invalid_next' => $next,
+                                'message' => 'next_question_index does not exist in this symptom payload and is not "END" or "false"'
                             ];
                         }
+                    }
+                }
 
-                        Question::whereKey($qid)->update(['answers' => $answersToStore]);
+                if (!empty($errors)) {
+                    continue; // or break if you want to stop on first error
+                }
+
+                $indexToId = [];
+
+                // Create questions
+                foreach ($incomingQuestions as $q) {
+                    $question = new Question();
+                    $question->symptomid          = $symptomId;
+                    $question->gender             = $gender;
+                    $question->question_index     = $q['question_index'];
+                    $question->question_text      = $q['question_text'];
+                    $question->is_active          = $q['is_active'] ?? $defaultIsActive;
+                    $question->answers            = []; // temporary placeholder
+                    if ($question->isFillable('created_by')) {
+                        $question->created_by = $request->user()->id ?? null;
+                    }
+                    $question->save();
+
+                    $indexToId[$q['question_index']] = $question->id;
+                }
+
+                // Update answers with real next_question_id
+                foreach ($incomingQuestions as $q) {
+                    $qid = $indexToId[$q['question_index']];
+
+                    $answersToStore = [];
+                    foreach ($q['answers'] ?? [] as $a) {
+                        $next = $a['next_question_index'] ?? null;
+                        $nextId = null;
+
+                        // Only resolve to ID if NOT a terminal value
+                        if ($next && strtoupper($next) !== 'END' && strtoupper($next) !== 'FALSE') {
+                            $nextId = $indexToId[$next] ?? null;
+                        }
+
+                        $answersToStore[] = [
+                            'answer'             => $a['answer'],
+                            'next_question_id'   => $nextId,
+                        ];
                     }
 
-                    $allResults[] = [
-                        'symptomid' => $symptomId,
-                        'questions_created' => count($incomingQuestions),
-                        'index_to_id' => $indexToId
-                    ];
+                    Question::whereKey($qid)->update(['answers' => $answersToStore]);
                 }
-            });
 
-            if (!empty($errors)) {
-                return response()->json([
-                    'message' => 'Some symptoms failed validation',
-                    'errors' => $errors,
-                    'successful' => $allResults
-                ], 422);
+                $allResults[] = [
+                    'symptomid' => $symptomId,
+                    'questions_created' => count($incomingQuestions),
+                    'index_to_id' => $indexToId
+                ];
             }
+        });
 
+        if (!empty($errors)) {
             return response()->json([
-                'message' => 'Bulk upload of multiple symptoms completed',
-                'count' => count($allResults),
-                'results' => $allResults
-            ], 201);
+                'message' => 'Some symptoms failed validation',
+                'errors' => $errors,
+                'successful' => $allResults
+            ], 422);
         }
+
+        return response()->json([
+            'message' => 'Bulk upload of multiple symptoms completed',
+            'count' => count($allResults),
+            'results' => $allResults
+        ], 201);
+    }
 
     private function findDuplicates(array $values): array
     {

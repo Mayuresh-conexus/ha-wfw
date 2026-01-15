@@ -58,7 +58,7 @@ class QuestionBulkUploadController extends Controller
                         $next = $a['next_question_index'] ?? null;
 
                         // Allow both 'END' and 'false' (case-insensitive) as terminal values
-                        if (!$next || strtoupper($next) === 'END' || strtoupper($next) === 'FALSE') {
+                        if (!$next || strtoupper($next) === 'END' || strtoupper($next) === 'false') {
                             continue;
                         }
 
@@ -107,7 +107,7 @@ class QuestionBulkUploadController extends Controller
                         $nextId = null;
 
                         // Only resolve to ID if NOT a terminal value
-                        if ($next && strtoupper($next) !== 'END' && strtoupper($next) !== 'FALSE') {
+                        if ($next && strtoupper($next) !== 'END' && strtoupper($next) !== 'false') {
                             $nextId = $indexToId[$next] ?? null;
                         }
 

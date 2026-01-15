@@ -14,7 +14,7 @@ class QuestionBulkUploadController extends Controller
         $data = $request->validate([
             'symptoms' => ['required', 'array', 'min:1'],
             'symptoms.*.symptomid' => ['required', 'string', 'max:100'],
-            'symptoms.*.gender' => ['nullable', 'in:Male,Female,Other,All'], // ← fixed typo: "gfalseer" → "gender"
+            'symptoms.*.gender' => ['nullable', 'in:Male,Female,Other,All'],
             'symptoms.*.default_is_active' => ['nullable', 'in:0,1'],
             'symptoms.*.questions' => ['required', 'array', 'min:1'],
             'symptoms.*.questions.*.question_index' => ['required', 'string', 'max:255'],
@@ -38,7 +38,7 @@ class QuestionBulkUploadController extends Controller
 
                 $incomingQuestions = $symptomData['questions'] ?? [];
 
-                // Check for duplicate question indexes within this symptom
+                // Check for duplicate question_index within this symptom
                 $indexes = array_map(fn($q) => $q['question_index'], $incomingQuestions);
                 $duplicateIndexes = $this->findDuplicates($indexes);
                 if (!empty($duplicateIndexes)) {
@@ -50,37 +50,9 @@ class QuestionBulkUploadController extends Controller
                     continue;
                 }
 
-                $payloadIndexSet = array_flip($indexes);
-
-                // Validate next_question_index references
-                foreach ($incomingQuestions as $q) {
-                    foreach ($q['answers'] ?? [] as $a) {
-                        $next = $a['next_question_index'] ?? null;
-
-                        // Allow both 'END' and 'false' (case-insensitive) as terminal values
-                        if (!$next || strtoupper($next) === 'END' || strtoupper($next) === 'false') {
-                            continue;
-                        }
-
-                        // If not terminal, must exist in this payload
-                        if (!isset($payloadIndexSet[$next])) {
-                            $errors[] = [
-                                'symptomid' => $symptomId,
-                                'question_index' => $q['question_index'] ?? 'unknown',
-                                'invalid_next' => $next,
-                                'message' => 'next_question_index does not exist in this symptom payload and is not "END" or "false"'
-                            ];
-                        }
-                    }
-                }
-
-                if (!empty($errors)) {
-                    continue; // or break if you want to stop on first error
-                }
-
                 $indexToId = [];
 
-                // Create questions
+                // Create all questions first
                 foreach ($incomingQuestions as $q) {
                     $question = new Question();
                     $question->symptomid          = $symptomId;
@@ -88,7 +60,7 @@ class QuestionBulkUploadController extends Controller
                     $question->question_index     = $q['question_index'];
                     $question->question_text      = $q['question_text'];
                     $question->is_active          = $q['is_active'] ?? $defaultIsActive;
-                    $question->answers            = []; // temporary placeholder
+                    $question->answers            = []; // temporary
                     if ($question->isFillable('created_by')) {
                         $question->created_by = $request->user()->id ?? null;
                     }
@@ -97,23 +69,17 @@ class QuestionBulkUploadController extends Controller
                     $indexToId[$q['question_index']] = $question->id;
                 }
 
-                // Update answers with real next_question_id
+                // Update answers (store next_question_index as string, no resolution)
                 foreach ($incomingQuestions as $q) {
                     $qid = $indexToId[$q['question_index']];
 
                     $answersToStore = [];
                     foreach ($q['answers'] ?? [] as $a) {
                         $next = $a['next_question_index'] ?? null;
-                        $nextId = null;
-
-                        // Only resolve to ID if NOT a terminal value
-                        if ($next && strtoupper($next) !== 'END' && strtoupper($next) !== 'false') {
-                            $nextId = $indexToId[$next] ?? null;
-                        }
 
                         $answersToStore[] = [
                             'answer'             => $a['answer'],
-                            'next_question_id'   => $nextId,
+                            'next_question_index' => $next,  // ← store as string (no ID lookup)
                         ];
                     }
 

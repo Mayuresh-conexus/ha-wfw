@@ -13,8 +13,8 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $data = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
+            'email'       => ['required', 'email'],
+            'password'    => ['required', 'string'],
             'device_name' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -32,10 +32,6 @@ class AuthController extends Controller
                 'message' => 'Access denied. Only volunteers can log in via mobile app.'
             ], 403);
         }
-
-        // REMOVED: $user->tokens()->delete();
-        // → This was forcing single-device login
-        // → Now removed so multiple devices stay logged in
 
         $deviceName = $data['device_name'] ?? 'android';
         $token = $user->createToken($deviceName)->plainTextToken;
@@ -69,18 +65,18 @@ class AuthController extends Controller
             })->values();
 
         $doctors = User::whereIn('id', $user->doctorid)
-    ->select('id', 'name', 'gender' )  // Select the columns you want to fetch
-    ->get();
+            ->select('id', 'name', 'gender')  // Select the columns you want to fetch
+            ->get();
 
         return response()->json([
-            'message' => 'success',
-            'token' => $token,
+            'message'   => 'success',
+            'token'     => $token,
             'token_type' => 'Bearer',
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
             'role' => $role,
-            'doctors' =>$doctors,
+            'doctors' => $doctors,
             'gender' => $user->gender,
             'programs'  => $programs,
         ]);

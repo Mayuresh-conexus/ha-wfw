@@ -11,7 +11,8 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\RecordController;
 use App\Http\Controllers\Api\FlowController;
 use App\Http\Controllers\Api\QuestionBulkUploadController;
-use App\Http\Controllers\Api\SymptomBulkController;
+use App\Http\Controllers\Api\SymptomController;
+
 
 
 
@@ -19,6 +20,7 @@ use App\Http\Controllers\Api\SymptomBulkController;
 
 Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::get('/symptoms-with-questions', [SymptomController::class, 'getSymptomsWithQuestions']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/auth/me', [AuthController::class, 'me']);
@@ -68,15 +70,10 @@ Route::prefix('v1')->group(function () {
 
         //Projects
         Route::get('/projects/by-program/{programId}', [ProjectController::class, 'byProgram']);
-
         // Bulk Question Upload
-         Route::post('/questions/bulk', [QuestionBulkUploadController::class, 'store']);
+        //  Route::post('/questions/bulk', [QuestionBulkUploadController::class, 'store']);
 
-         // Bulk Symptom Upload
-         Route::post('/symptoms/bulk', [SymptomBulkController::class, 'store'])
-    ->name('symptoms.bulk.store');
 
-        
         //resourses should be last otherwise it may override other routes
         // Route::apiResource('projects', ProjectController::class);
     });

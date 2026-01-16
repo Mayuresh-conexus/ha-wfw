@@ -42,6 +42,36 @@ class AuthController extends Controller
 
         $role = $user->getRoleNames()->first();
 
+        $programs = \App\Models\Program::where('is_active', 1)
+            ->whereHas('projects', function ($query) use ($user) {
+                $query->where('volunteerid', $user->id);
+            })
+            ->with(['projects' => function ($query) use ($user) {
+                $query->where('volunteerid', $user->id)
+                    ->where('is_active', 1)
+                    ->select('id', 'name', 'programid');
+            }])
+            ->get(['id', 'name'])
+            ->map(function ($program) {
+                return [
+                    'id'       => $program->id,
+                    'name'     => $program->name,
+                    'projects' => $program->projects->map(function ($project) {
+                        return [
+                            'id'   => $project->id,
+                            'name' => $project->name,
+                        ];
+                    })->values(),
+                ];
+            })->filter(function ($program) {
+                // Only keep programs that have at least one project
+                return $program['projects']->isNotEmpty();
+            })->values();
+
+        $doctors = User::whereIn('id', $user->doctorid)
+    ->select('id', 'name', 'gender' )  // Select the columns you want to fetch
+    ->get();
+
         return response()->json([
             'message' => 'success',
             'token' => $token,
@@ -50,6 +80,9 @@ class AuthController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'role' => $role,
+            'doctors' =>$doctors,
+            'gender' => $user->gender,
+            'programs'  => $programs,
         ]);
     }
 

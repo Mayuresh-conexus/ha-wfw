@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('nlnumber')->nullable();
             $table->string('proofid')->nullable();
             $table->boolean('isactive')->default(true);
+            $table->json('doctorid')->nullable();
+            $table->string('gender')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

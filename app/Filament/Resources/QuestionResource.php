@@ -141,14 +141,18 @@ class QuestionResource extends Resource
                     })
                     ->sortable()
                     ->searchable(),
-                 BadgeColumn::make('is_active')
+                
+                TextColumn::make('gender')->toggleable(),
+                 
+                BadgeColumn::make('is_active')
                     ->label('Status')
                     ->getStateUsing(fn ($record) => $record->is_active ? 'Active' : 'Inactive')
                     ->colors([
                         'success' => fn ($state) => $state === 'Active',
                         'danger' => fn ($state) => $state === 'Inactive',
                     ]),
-                TextColumn::make('created_at')->dateTime('d M Y H:i')->label('Created'),
+                TextColumn::make('created_at')->dateTime('d M Y H:i')->label('Created')->toggleable(),
+                
             ])
             ->actions([
                 EditAction::make(),

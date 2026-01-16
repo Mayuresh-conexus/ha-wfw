@@ -75,7 +75,7 @@ class ProgramResource extends Resource
                 TextColumn::make('name')->sortable()->searchable(),
                 TextColumn::make('description')
                     ->limit(50)
-                    ->formatStateUsing(fn ($state) => $state ?? '—'),
+                    ->formatStateUsing(fn ($state) => $state ?? '—')->toggleable(),
 
                 BadgeColumn::make('is_active')
                     ->label('Status')
@@ -85,8 +85,8 @@ class ProgramResource extends Resource
                         'danger' => fn ($state) => $state === 'Inactive',
                     ]),
 
-                TextColumn::make('created_at')->dateTime()->label('Created'),
-                TextColumn::make('updated_at')->dateTime()->label('Updated'),
+                TextColumn::make('created_at')->dateTime()->label('Created')->toggleable(),
+                TextColumn::make('updated_at')->dateTime()->label('Updated')->toggleable(),
             ])
             ->filters([
                 Tables\Filters\Filter::make('active')

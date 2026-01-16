@@ -87,7 +87,7 @@ class BodySectionResource extends Resource
                         'secondary' => fn ($state) => $state === 'No',
                     ]),
 
-                TextColumn::make('created_at')->dateTime('d M Y H:i')->label('Created'),
+                TextColumn::make('created_at')->dateTime('d M Y H:i')->label('Created')->toggleable(),
             ])
             ->filters([])
             ->headerActions([

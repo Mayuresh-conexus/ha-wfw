@@ -155,23 +155,21 @@ class ProjectResource extends Resource
             ->columns([
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('name')->sortable()->searchable(),
-                TextColumn::make('city.name')->label('City')->default('—'),
-                TextColumn::make('state.name')->label('State')->default('—'),
-                TextColumn::make('country.name')->label('Country')->default('—'),
-                TextColumn::make('program.name')->label('Program')->limit(50)->default('—'),
-
+                TextColumn::make('city.name')->label('City')->default('—')->toggleable(),
+                TextColumn::make('state.name')->label('State')->default('—')->toggleable(),
+                TextColumn::make('country.name')->label('Country')->default('—')->toggleable(),
+                TextColumn::make('program.name')->label('Program')->limit(50)->default('—')->toggleable(),
+                TextColumn::make('startdate')->date()->label('Start Date')->toggleable(),
+                TextColumn::make('enddate')->date()->label('End Date')->toggleable(),
+                TextColumn::make('budget')->money('USD', true)->label('Budget')->toggleable(),
+                TextColumn::make('created_at')->dateTime()->label('Created')->toggleable(),
                 BadgeColumn::make('is_active')
                     ->label('Status')
                     ->getStateUsing(fn ($record) => $record->is_active ? 'Active' : 'Inactive')
                     ->colors([
                         'success' => fn ($state) => $state === 'Active',
                         'danger' => fn ($state) => $state === 'Inactive',
-                    ]),
-
-                TextColumn::make('startdate')->date()->label('Start Date'),
-                TextColumn::make('enddate')->date()->label('End Date'),
-                TextColumn::make('budget')->money('USD', true)->label('Budget'),
-                TextColumn::make('created_at')->dateTime()->label('Created'),
+                    ])->toggleable(),
             ])
             ->filters([
                 Tables\Filters\Filter::make('active')

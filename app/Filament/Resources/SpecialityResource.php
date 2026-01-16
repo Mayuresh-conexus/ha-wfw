@@ -80,8 +80,8 @@ class SpecialityResource extends Resource
                         'success' => fn ($state) => $state === 'Active',
                         'danger' => fn ($state) => $state === 'Inactive',
                     ]),
-                TextColumn::make('created_at')->dateTime()->label('Created'),
-                TextColumn::make('updated_at')->dateTime()->label('Updated'),
+                TextColumn::make('created_at')->dateTime()->label('Created')->toggleable(),
+                TextColumn::make('updated_at')->dateTime()->label('Updated')->toggleable(),
             ])
             ->filters([
                 Tables\Filters\Filter::make('active')

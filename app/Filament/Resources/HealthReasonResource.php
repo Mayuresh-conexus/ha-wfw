@@ -76,7 +76,7 @@ class HealthReasonResource extends Resource
 
                 TextColumn::make('created_at')
                     ->dateTime('d M Y H:i')
-                    ->label('Created'),
+                    ->label('Created')->toggleable(),
             ])
             ->filters([])
             ->headerActions([

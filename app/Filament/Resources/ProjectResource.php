@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProjectResource\Pages;
 use App\Models\Project;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
@@ -70,15 +71,24 @@ class ProjectResource extends Resource
                 ]),
 
                 Forms\Components\Select::make('gpid')
-                ->label('GP')
-                ->options(function () {
-                    return \App\Models\User::role('gp')
-                        ->pluck('name', 'id');
-                })
+               ->label('Doctors / GP')
+                ->options(fn () =>
+                    User::role(['doctor', 'gp'])
+                        ->pluck('name', 'id')
+                )
+                ->multiple()
                 ->searchable()
                 ->preload()
-                ->multiple() // This allows the selection of multiple GPs
-                ->nullable(),
+                ->nullable()
+                ->afterStateHydrated(function ($component, $state, $record) {
+                    if ($record && $record->gpid) {
+                        $component->state($record->gpid);
+                    }
+                })
+                ->saveRelationshipsUsing(function ($record, $state) {
+                    $record->gpid = $state;
+                    $record->save();
+                }),
 
             Forms\Components\Select::make('volunteerid')
                 ->label('Volunteer')

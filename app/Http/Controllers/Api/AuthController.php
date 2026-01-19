@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Program;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -38,46 +39,52 @@ class AuthController extends Controller
 
         $role = $user->getRoleNames()->first();
 
-        $programs = \App\Models\Program::where('is_active', 1)
-            ->whereHas('projects', function ($query) use ($user) {
-                $query->where('volunteerid', $user->id);
-            })
-            ->with(['projects' => function ($query) use ($user) {
-                $query->where('volunteerid', $user->id)
-                    ->where('is_active', 1)
-                    ->select('id', 'name', 'programid');
-            }])
-            ->get(['id', 'name'])
-            ->map(function ($program) {
-                return [
-                    'id'       => $program->id,
-                    'name'     => $program->name,
-                    'projects' => $program->projects->map(function ($project) {
-                        return [
-                            'id'   => $project->id,
-                            'name' => $project->name,
-                        ];
-                    })->values(),
-                ];
-            })->filter(function ($program) {
-                // Only keep programs that have at least one project
-                return $program['projects']->isNotEmpty();
-            })->values();
-
-        $doctors = User::whereIn('id', $user->doctorid)
-    ->select('id', 'name', 'gender')
-    ->with('roles:name')
-    ->get()
-    ->map(function ($doctor) {
+        $programs = Program::where('is_active', 1)
+    ->whereHas('projects', function ($query) use ($user) {
+        $query->where('volunteerid', $user->id)
+              ->where('is_active', 1);
+    })
+    ->with([
+        'projects' => function ($query) use ($user) {
+            $query->where('volunteerid', $user->id)
+                  ->where('is_active', 1)
+                  ->select('id', 'name', 'programid', 'gpid');
+        }
+    ])
+    ->get(['id', 'name'])
+    ->map(function ($program) {
         return [
-            'id'     => $doctor->id,
-            'name'   => $doctor->name,
-            'gender' => $doctor->gender,
-            'role'   => $doctor->roles->first()?->name,
+            'id' => $program->id,
+            'name' => $program->name,
+            'projects' => $program->projects->map(function ($project) {
+
+                $users = User::whereIn('id', $project->gpid ?? [])
+                    ->with('roles:name')
+                    ->get(['id', 'name', 'gender'])
+                    ->map(function ($user) {
+                        return [
+                            'id' => (string) $user->id,
+                            'name' => $user->name,
+                            'role' => $user->roles->pluck('name')->first(),
+                            'gender' => $user->gender,
+                        ];
+                    })
+                    ->values();
+
+                return [
+                    'id' => $project->id,
+                    'name' => $project->name,
+                    'users' => $users,
+                ];
+            })->values(),
         ];
-    });
+    })
+    ->filter(function ($program) {
+        return $program['projects']->isNotEmpty();
+    })
+    ->values();
 
-
+        
         return response()->json([
             'message'   => 'success',
             'token'     => $token,
@@ -86,7 +93,6 @@ class AuthController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'role' => $role,
-            'doctors' => $doctors,
             'gender' => $user->gender,
             'programs'  => $programs,
         ]);

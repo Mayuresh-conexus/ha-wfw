@@ -65,8 +65,18 @@ class AuthController extends Controller
             })->values();
 
         $doctors = User::whereIn('id', $user->doctorid)
-            ->select('id', 'name', 'gender')  // Select the columns you want to fetch
-            ->get();
+    ->select('id', 'name', 'gender')
+    ->with('roles:name')
+    ->get()
+    ->map(function ($doctor) {
+        return [
+            'id'     => $doctor->id,
+            'name'   => $doctor->name,
+            'gender' => $doctor->gender,
+            'role'   => $doctor->roles->first()?->name,
+        ];
+    });
+
 
         return response()->json([
             'message'   => 'success',

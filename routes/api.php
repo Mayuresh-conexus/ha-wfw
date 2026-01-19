@@ -71,7 +71,7 @@ Route::prefix('v1')->group(function () {
         //Projects
         Route::get('/projects/by-program/{programId}', [ProjectController::class, 'byProgram']);
         // Bulk Question Upload
-        //  Route::post('/questions/bulk', [QuestionBulkUploadController::class, 'store']);
+        Route::post('/questions/bulk', [QuestionBulkUploadController::class, 'store']);
 
 
         //resourses should be last otherwise it may override other routes

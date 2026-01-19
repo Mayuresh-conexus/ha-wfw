@@ -77,24 +77,26 @@ class UserResource extends Resource
                 $record->syncRoles($state); 
             }),
 
-        // Doctors selection
-        Forms\Components\Select::make('doctors')
-            ->label('Doctors')
-            ->options(fn () => User::role('doctor')->pluck('name', 'id'))
-            ->multiple()
-            ->searchable()
-            ->preload()
-            ->nullable()
-            ->afterStateHydrated(function ($component, $state, $record) {
-                if ($record && $record->doctorid) {
-                    $component->state($record->doctorid);  // Set previously selected doctors' IDs
-                }
-            })
-            ->saveRelationshipsUsing(function ($record, $state) {
-                // Save the selected doctor IDs in the `doctorid` column (JSON array)
-                $record->doctorid = $state; 
-                $record->save();
-            }),
+        // Doctors and GP selection
+        Forms\Components\Select::make('doctorid')
+    ->label('Doctors / GP')
+    ->options(fn () =>
+        User::role(['doctor', 'gp'])
+            ->pluck('name', 'id')
+    )
+    ->multiple()
+    ->searchable()
+    ->preload()
+    ->nullable()
+    ->afterStateHydrated(function ($component, $state, $record) {
+        if ($record && $record->doctorid) {
+            $component->state($record->doctorid);
+        }
+    })
+    ->saveRelationshipsUsing(function ($record, $state) {
+        $record->doctorid = $state;
+        $record->save();
+    }),
         
         Select::make('gender')
                     ->options(['Male' => 'Male', 'Female' => 'Female', 'Other' => 'Other']),
@@ -130,7 +132,7 @@ class UserResource extends Resource
 
             // Display Doctors (comma-separated names)
             Tables\Columns\TextColumn::make('doctorid') // Assuming 'doctorid' is an array of doctor IDs
-                ->label('Doctors')
+                ->label('Doctors/GP')
                 ->toggleable()
                 ->getStateUsing(function ($record) {
                     // Safely handle doctorid being null or empty

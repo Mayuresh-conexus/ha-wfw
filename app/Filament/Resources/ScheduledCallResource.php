@@ -29,7 +29,11 @@ class ScheduledCallResource extends Resource
         return (string) ScheduledCall::count();
     }
 
- 
+  public static function shouldRegisterNavigation(): bool
+    {
+        return Gate::allows('view_any_' . static::getModelLabel());
+    }
+
 
     public static function form(Form $form): Form
     {

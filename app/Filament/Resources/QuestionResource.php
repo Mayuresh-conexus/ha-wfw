@@ -33,9 +33,9 @@ class QuestionResource extends Resource
         return (string) Question::count();
     }
 
-    public static function shouldRegisterNavigation(): bool
+     public static function shouldRegisterNavigation(): bool
     {
-        return true;
+        return Gate::allows('view_any_' . static::getModelLabel());
     }
 
     public static function form(Forms\Form $form): Forms\Form

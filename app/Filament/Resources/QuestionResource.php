@@ -21,6 +21,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Grid;
+use Illuminate\Support\Facades\Gate;
 
 class QuestionResource extends Resource
 {

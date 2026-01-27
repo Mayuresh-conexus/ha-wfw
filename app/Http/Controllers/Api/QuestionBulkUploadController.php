@@ -28,7 +28,7 @@ class QuestionBulkUploadController extends Controller
         $allResults = [];
         $errors = [];
 
-        DB::transaction(function () use ($data, &$allResults, &$errors) {
+        DB::transaction(function () use ($data, $request, &$allResults, &$errors) {
 
             foreach ($data['symptoms'] as $symptomData) {
 
@@ -52,34 +52,53 @@ class QuestionBulkUploadController extends Controller
 
                 $indexToId = [];
 
-                // Create all questions first
+                // 1) Create all questions first
                 foreach ($incomingQuestions as $q) {
                     $question = new Question();
-                    $question->symptomid          = $symptomId;
-                    $question->gender             = $gender;
-                    $question->question_index     = $q['question_index'];
-                    $question->question_text      = $q['question_text'];
-                    $question->is_active          = $q['is_active'] ?? $defaultIsActive;
-                    $question->answers            = []; // temporary
+                    $question->symptomid      = $symptomId;
+                    $question->gender         = $gender;
+                    $question->question_index = (string) $q['question_index'];
+                    $question->question_text  = $q['question_text'];
+                    $question->is_active      = $q['is_active'] ?? $defaultIsActive;
+                    $question->answers        = []; // temporary
+
                     if ($question->isFillable('created_by')) {
                         $question->created_by = $request->user()->id ?? null;
                     }
+
                     $question->save();
 
-                    $indexToId[$q['question_index']] = $question->id;
+                    // map question_index -> DB id
+                    $indexToId[(string) $q['question_index']] = $question->id;
                 }
 
-                // Update answers (store next_question_id as string, no resolution)
+                // 2) Update answers (✅ resolve next_question_id index -> DB id)
                 foreach ($incomingQuestions as $q) {
-                    $qid = $indexToId[$q['question_index']];
+                    $qid = $indexToId[(string) $q['question_index']];
 
                     $answersToStore = [];
                     foreach ($q['answers'] ?? [] as $a) {
-                        $next = $a['next_question_id'] ?? null;
+
+                        $nextRaw = $a['next_question_id'] ?? null;
+
+                        // Normalize END markers
+                        if ($nextRaw === null || $nextRaw === '' || $nextRaw === 'false' || $nextRaw === false) {
+                            $nextResolved = null;
+                        } else {
+                            $nextRawStr = (string) $nextRaw;
+
+                            // ✅ If it's a question_index inside this same symptom, resolve to DB id
+                            if (isset($indexToId[$nextRawStr])) {
+                                $nextResolved = (string) $indexToId[$nextRawStr];
+                            } else {
+                                // Otherwise assume it's already a DB id and store it
+                                $nextResolved = $nextRawStr;
+                            }
+                        }
 
                         $answersToStore[] = [
-                            'answer'             => $a['answer'],
-                            'next_question_id' => $next,  // ← store as string (no ID lookup)
+                            'answer' => $a['answer'],
+                            'next_question_id' => $nextResolved,
                         ];
                     }
 

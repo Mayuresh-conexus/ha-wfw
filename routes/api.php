@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\FlowController;
 use App\Http\Controllers\Api\QuestionBulkUploadController;
 use App\Http\Controllers\Api\SymptomController;
 use App\Http\Controllers\Api\SymptomBulkController;
+use App\Http\Controllers\Api\MedicineController;
 
 
 
@@ -78,5 +79,13 @@ Route::prefix('v1')->group(function () {
 
         //resourses should be last otherwise it may override other routes
         // Route::apiResource('projects', ProjectController::class);
+
+
+        //Medicines
+        Route::post('/medicines', [MedicineController::class, 'store']);
+        Route::get('/medicines', [MedicineController::class, 'index']);
+        Route::post('/medicines/bulk', [MedicineController::class, 'bulkStore']);
+
+
     });
 });

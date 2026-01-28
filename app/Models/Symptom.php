@@ -31,4 +31,9 @@ class Symptom extends Model
         {
             return $this->hasMany(Question::class, 'symptomid');
         }
+ public function medicines()
+{
+    return $this->hasMany(Medicine::class);
+}
+
 }

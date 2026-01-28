@@ -22,7 +22,7 @@ class QuestionBulkUploadController extends Controller
             'symptoms.*.questions.*.is_active' => ['nullable', 'in:0,1'],
             'symptoms.*.questions.*.answers' => ['required', 'array', 'min:1'],
             'symptoms.*.questions.*.answers.*.answer' => ['required', 'string', 'max:255'],
-            'symptoms.*.questions.*.answers.*.next_question_id' => ['nullable', 'string', 'max:255'],
+            'symptoms.*.questions.*.answers.*.next_question_id' => ['nullable'],
         ]);
 
         $allResults = [];
@@ -79,22 +79,23 @@ class QuestionBulkUploadController extends Controller
                     $answersToStore = [];
                     foreach ($q['answers'] ?? [] as $a) {
 
-                        $nextRaw = $a['next_question_id'] ?? null;
+                        $nextRaw = $a['next_question_id'] ?? false;
 
-                        // Normalize END markers
-                        if ($nextRaw === null || $nextRaw === '' || $nextRaw === 'false' || $nextRaw === false) {
-                            $nextResolved = null;
+                    // Treat these as END
+                    if ($nextRaw === false || $nextRaw === null || $nextRaw === '' || $nextRaw === 'false' || $nextRaw === 'none') {
+                        $nextResolved = false; // ✅ store false like Filament
+                    } else {
+                        $nextRawStr = (string) $nextRaw;
+
+                        // if it's a local index -> resolve to DB id
+                        if (isset($indexToId[$nextRawStr])) {
+                            $nextResolved = (int) $indexToId[$nextRawStr];
                         } else {
-                            $nextRawStr = (string) $nextRaw;
-
-                            // ✅ If it's a question_index inside this same symptom, resolve to DB id
-                            if (isset($indexToId[$nextRawStr])) {
-                                $nextResolved = (string) $indexToId[$nextRawStr];
-                            } else {
-                                // Otherwise assume it's already a DB id and store it
-                                $nextResolved = $nextRawStr;
-                            }
+                            // assume already a DB id
+                            $nextResolved = is_numeric($nextRawStr) ? (int) $nextRawStr : $nextRawStr;
                         }
+                    }
+
 
                         $answersToStore[] = [
                             'answer' => $a['answer'],

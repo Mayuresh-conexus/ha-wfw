@@ -99,8 +99,8 @@ class MedicineResource extends Resource
     {
         return [
             'index' => Pages\ListMedicines::route('/'),
-            'create' => Pages\CreateMedicine::route('/create'),
-            'edit' => Pages\EditMedicine::route('/{record}/edit'),
+            // 'create' => Pages\CreateMedicine::route('/create'),
+            // 'edit' => Pages\EditMedicine::route('/{record}/edit'),
         ];
     }
 }

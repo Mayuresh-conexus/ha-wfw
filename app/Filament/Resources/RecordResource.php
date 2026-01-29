@@ -108,6 +108,14 @@ class RecordResource extends Resource
                 ->label('Program')
                 ->relationship('program', 'name')
                 ->searchable(),
+            
+            Forms\Components\Select::make('medicineid')
+                ->label('Medicines')
+                ->options(fn () => \App\Models\Medicine::pluck('name', 'id'))
+                ->searchable()
+                ->preload()
+                ->multiple()
+                ->nullable(),
 
             Forms\Components\TextInput::make('record_type')
                 ->label('Record Type'),

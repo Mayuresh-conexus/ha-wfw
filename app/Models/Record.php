@@ -15,6 +15,7 @@ class Record extends Model
         'volunteerid',
         'projectid',
         'programid',
+        'medicineid',
         'symptom_ids',
         'question_summary',
         'record_type',
@@ -31,6 +32,7 @@ class Record extends Model
         'symptom_ids' => 'array',         // ← ADD THIS
         'question_summary' => 'array',    // ← ADD THIS (for consistency)
         'submitted_at' => 'datetime',
+        'medicineid' => 'array',
     ];
 
     public function patient()

@@ -27,6 +27,8 @@ class CreateRecordsTable extends Migration
             $table->foreignId('projectid')->nullable()->constrained('projects')->onDelete('set null');
             $table->foreignId('programid')->nullable()->constrained('programs')->onDelete('set null');
 
+            $table->json('medicineid')->nullable(); 
+
             // Add new standardized fields
             $table->string('record_type')->nullable();  // e.g. consultation, follow-up, etc.
             $table->text('notes')->nullable();

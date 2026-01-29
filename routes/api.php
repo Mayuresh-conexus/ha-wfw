@@ -82,9 +82,8 @@ Route::prefix('v1')->group(function () {
 
 
         //Medicines
-        Route::post('/medicines', [MedicineController::class, 'store']);
-        Route::get('/medicines', [MedicineController::class, 'index']);
         Route::post('/medicines/bulk', [MedicineController::class, 'bulkStore']);
+        Route::get('/medicines', [MedicineController::class, 'index']);
 
 
     });

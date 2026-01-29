@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\QuestionBulkUploadController;
 use App\Http\Controllers\Api\SymptomController;
 use App\Http\Controllers\Api\SymptomBulkController;
 use App\Http\Controllers\Api\MedicineController;
+use App\Http\Controllers\Api\RoundRobinController;
 
 
 
@@ -84,6 +85,9 @@ Route::prefix('v1')->group(function () {
         //Medicines
         Route::post('/medicines/bulk', [MedicineController::class, 'bulkStore']);
         Route::get('/medicines', [MedicineController::class, 'index']);
+
+        //Doctor by Patient count for respective program
+        Route::get('/records/doctor-patient-count/{projectId}', [RoundRobinController::class, 'index']);
 
 
     });

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\MedicineResource\Pages;
 use App\Filament\Resources\MedicineResource\RelationManagers;
 use App\Models\Medicine;
+use App\Models\Symptom;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -33,11 +34,13 @@ class MedicineResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-        Forms\Components\Select::make('symptom_id')
-            ->label('Symptom')
-            ->relationship('symptom', 'name')
-            ->searchable()
-            ->required(),
+        Forms\Components\Select::make('symptom_ids')
+    ->label('Symptoms')
+    ->options(Symptom::pluck('name', 'id'))
+    ->multiple()
+    ->searchable()
+    ->required(),
+
 
         Forms\Components\TextInput::make('name')
             ->required(),
@@ -60,9 +63,7 @@ class MedicineResource extends Resource
     {
         return $table
             ->columns([
-        Tables\Columns\TextColumn::make('symptom.name')
-            ->label('Symptom')
-            ->searchable(),
+        
 
         Tables\Columns\TextColumn::make('name')
             ->searchable(),

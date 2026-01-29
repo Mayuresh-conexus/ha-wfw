@@ -10,7 +10,7 @@ class Medicine extends Model
     use HasFactory;
 
     protected $fillable = [
-        'symptom_id',
+        'symptom_ids',
         'name',
         'type',
         'dosage',
@@ -18,6 +18,7 @@ class Medicine extends Model
     ];
 
     protected $casts = [
+        'symptom_ids' => 'array',
         'is_active' => 'boolean',
     ];
 

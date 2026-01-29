@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('medicines', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('symptom_id')->constrained('symptoms')->cascadeOnDelete();
+            $table->json('symptom_ids');
             $table->string('name');
             $table->string('type')->nullable();
             $table->string('dosage')->nullable();

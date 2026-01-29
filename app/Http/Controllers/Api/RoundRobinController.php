@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Record;
 use Illuminate\Http\Request;
+use App\Models\Doctor;
 
 class RoundRobinController extends Controller
 {
@@ -18,11 +19,6 @@ class RoundRobinController extends Controller
         $patientId = $record->patientid;
 
         foreach ($record->doctorid ?? [] as $doctorId) {
-            if (!isset($doctorPatientMap[$doctorId])) {
-                $doctorPatientMap[$doctorId] = [];
-            }
-
-            // ensure unique patients per doctor
             $doctorPatientMap[$doctorId][$patientId] = true;
         }
     }
@@ -30,7 +26,21 @@ class RoundRobinController extends Controller
     $doctorPatientCounts = collect($doctorPatientMap)
         ->map(fn ($patients) => count($patients));
 
-    return response()->json($doctorPatientCounts);
+    // Fetch doctor names in one query
+    $doctorNames = Doctor::whereIn('id', $doctorPatientCounts->keys())
+        ->pluck('name', 'id');
+
+    // Final response: id : doctor : count
+    $response = $doctorPatientCounts->map(function ($count, $doctorId) use ($doctorNames) {
+        return [
+            'id'     => (int) $doctorId,
+            'doctor' => $doctorNames[$doctorId] ?? 'Unknown Doctor',
+            'count'  => $count,
+        ];
+    })->values();
+
+    return response()->json($response);
 }
+
 
 }

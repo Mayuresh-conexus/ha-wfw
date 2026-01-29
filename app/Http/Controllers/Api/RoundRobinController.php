@@ -32,15 +32,18 @@ class RoundRobinController extends Controller
 
     // Fetch doctor names from users table
     $doctorNames = User::whereIn('id', $doctorPatientCounts->keys())
-        ->pluck('name', 'id', 'gender')
+        ->pluck('name', 'id')
+        ->toArray();
+    $doctorgender = User::whereIn('id', $doctorPatientCounts->keys())
+        ->pluck('gender', 'id')
         ->toArray();
 
-    $response = $doctorPatientCounts->map(function ($count, $doctorId) use ($doctorNames) {
+    $response = $doctorPatientCounts->map(function ($count, $doctorId) use ($doctorNames, $doctorgender) {
         return [
             'id'     => (int) $doctorId,
             'doctor' => $doctorNames[$doctorId] ?? 'Unknown Doctor',
             'count'  => $count,
-            'gender' => $doctorNames[$doctorId]['gender'] ?? 'Not Specified',
+            'gender' => $doctorgender[$doctorId] ?? 'Not Specified',
         ];
     })->values();
 

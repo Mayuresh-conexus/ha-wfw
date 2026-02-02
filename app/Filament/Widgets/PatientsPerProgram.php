@@ -2,21 +2,17 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Card;
+use Filament\Widgets\Widget;
 use App\Models\Program;
 
-class PatientsPerProgram extends BaseWidget
+class PatientsPerProgram extends Widget
 {
-    protected function getCards(): array
-    {
-        // Fetch all programs with patient count
-        $programs = Program::withCount('patients')->get();
+    protected static string $view = 'filament.widgets.patients-per-program';
 
-        // Create a card for each program
-        return $programs->map(fn($program) => Card::make(
-            $program->name,
-            $program->patients_count
-        )->description('Registered Patients'))->toArray();
+    protected function getViewData(): array
+    {
+        return [
+            'programs' => Program::withCount('patients')->get(),
+        ];
     }
 }

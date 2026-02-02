@@ -3,51 +3,61 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use App\Models\Record;
-use Illuminate\Http\Request;
 use App\Models\User;
 
 class RoundRobinController extends Controller
 {
-  public function index($projectId)
-{
-    $records = Record::where('projectid', $projectId)->get();
+    public function index($projectId)
+    {
+        // 1. Fetch project
+        $project = Project::findOrFail($projectId);
 
-    $doctorPatientMap = [];
+        // 2. Get assigned doctor IDs from project (JSON)
+        $assignedDoctorIds = $project->gpid ?? [];
 
-    foreach ($records as $record) {
-        $patientId = $record->patientid;
-
-        foreach ($record->doctorid ?? [] as $doctorId) {
-            if (!isset($doctorPatientMap[$doctorId])) {
-                $doctorPatientMap[$doctorId] = [];
-            }
-
-            $doctorPatientMap[$doctorId][$patientId] = true;
+        if (empty($assignedDoctorIds)) {
+            return response()->json([]);
         }
+
+        // 3. Fetch assigned doctors
+       $doctors = User::whereIn('id', $assignedDoctorIds)
+        ->role(['doctor'])
+        ->get();
+
+        // 4. Fetch records for the project
+        $records = Record::where('projectid', $projectId)->get();
+
+        // 5. Build doctor => unique patient map
+        $doctorPatientMap = [];
+
+        foreach ($records as $record) {
+            $patientId = $record->patientid;
+
+            foreach ($record->doctorid ?? [] as $doctorId) {
+                if (! in_array($doctorId, $assignedDoctorIds)) {
+                    continue;
+                }
+
+                $doctorPatientMap[$doctorId][$patientId] = true;
+            }
+        }
+
+        // 6. Count unique patients per doctor
+        $doctorPatientCounts = collect($doctorPatientMap)
+            ->map(fn ($patients) => count($patients));
+
+        // 7. Build response including zero-count doctors
+        $response = $doctors->map(function ($doctor) use ($doctorPatientCounts) {
+            return [
+                'id'     => $doctor->id,
+                'doctor' => $doctor->name,
+                'count'  => $doctorPatientCounts[$doctor->id] ?? 0,
+                'gender' => $doctor->gender ?? 'Not Specified',
+            ];
+        })->values();
+
+        return response()->json($response);
     }
-
-    $doctorPatientCounts = collect($doctorPatientMap)
-        ->map(fn ($patients) => count($patients));
-
-    // Fetch doctor names from users table
-    $doctorNames = User::whereIn('id', $doctorPatientCounts->keys())
-        ->pluck('name', 'id')
-        ->toArray();
-    $doctorgender = User::whereIn('id', $doctorPatientCounts->keys())
-        ->pluck('gender', 'id')
-        ->toArray();
-
-    $response = $doctorPatientCounts->map(function ($count, $doctorId) use ($doctorNames, $doctorgender) {
-        return [
-            'id'     => (int) $doctorId,
-            'doctor' => $doctorNames[$doctorId] ?? 'Unknown Doctor',
-            'count'  => $count,
-            'gender' => $doctorgender[$doctorId] ?? 'Not Specified',
-        ];
-    })->values();
-
-    return response()->json($response);
-}
-
 }

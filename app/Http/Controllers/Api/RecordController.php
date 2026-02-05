@@ -35,7 +35,7 @@ class RecordController extends Controller
             'gpid'             => 'nullable|array',
             'gpid.*'           => 'integer|exists:users,id',
             'medicineid'       => 'nullable|array',
-            'medicineid.*'     => 'string|exists:medicines,id',
+            'medicineid.*'     => 'string|max:255',
         ]);
 
         // Decode question_summary (since we can't cast LONGTEXT automatically to array easily)

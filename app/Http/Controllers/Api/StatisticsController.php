@@ -170,9 +170,10 @@ class StatisticsController extends Controller
             if ($programId === null) continue;
 
             $program = $programProjects
-                ->where('is_active', 1)
-                ->first()
-                ->program;
+    ->where('is_active', 1)
+    ->first()
+    ?->program;
+
 
 
             $totalProjects = $programProjects->count();

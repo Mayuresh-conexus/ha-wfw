@@ -152,65 +152,84 @@ class StatisticsController extends Controller
         ]);
     }
 
-    public function counts(Request $request)
-    {
-        $volunteerId = $request->input('volunteer_id', auth()->id());
+   public function counts(Request $request)
+{
+    $volunteerId = $request->input('volunteer_id', auth()->id());
 
-        $projects = Project::where('volunteerid', $volunteerId)
-    ->where('is_active', 1)
-    ->select('id', 'programid', 'enddate')
-    ->with('program:id,name,description,is_active,created_at')
-    ->get();
+    // Load only active projects with only active programs
+    $projects = Project::where('volunteerid', $volunteerId)
+        ->where('is_active', 1)
+        ->select('id', 'programid', 'enddate')
+        ->with([
+            'program' => function ($query) {
+                $query->where('is_active', 1)
+                      ->select('id', 'name', 'description', 'is_active', 'created_at');
+            }
+        ])
+        ->get();
 
+    // Group by program
+    $grouped = $projects->groupBy('programid');
 
-        $grouped = $projects->groupBy('programid');
+    $data = [];
+    $totalPatientsOverall = 0;
 
-        $data = [];
-        $totalPatientsOverall = 0;
-
-        foreach ($grouped as $programId => $programProjects) {
-            if ($programId === null) continue;
-
-            $program = $programProjects->first()->program;
-
-            $totalProjects = $programProjects->count();
-            $completedProjects = $programProjects->filter(fn($p) => $p->enddate && $p->enddate < now())->count();
-
-            // Count patients directly assigned to this program
-            $patientCount = Patient::where('programid', $programId)->count();
-
-            $data[] = [
-                'program' => [
-                    'id' => $program->id,
-                    'name' => $program->name,
-                    'description' => $program->description,
-                    'is_active' => $program->is_active,
-                    'created_at' => $program->created_at,
-                ],
-                'project_count' => $totalProjects,
-                'completed_project_count' => $completedProjects,
-                'patient_count' => $patientCount,
-            ];
-
-            $totalPatientsOverall += $patientCount;
+    foreach ($grouped as $programId => $programProjects) {
+        if ($programId === null) {
+            continue;
         }
 
-        $upcomingAppointments = ScheduledCall::where('volunteer_id', $volunteerId)
-            ->where('status', 'scheduled')
+        // Skip if program is inactive or missing
+        $program = $programProjects->first()->program;
+        if (!$program) {
+            continue;
+        }
+
+        $totalProjects = $programProjects->count();
+
+        $completedProjects = $programProjects
+            ->filter(fn ($p) => $p->enddate && $p->enddate < now())
             ->count();
 
-        $completedAppointments = ScheduledCall::where('volunteer_id', $volunteerId)
-            ->where('status', 'completed')
+        // Count only active patients in this program
+        $patientCount = Patient::where('programid', $programId)
+            ->where('is_active', 1)
             ->count();
 
-        return response()->json([
-            'message' => 'success',
-            'data' => $data,
-            'total_registered_patients' => $totalPatientsOverall,
-            'appointments' => [
-                'upcoming_count' => $upcomingAppointments,
-                'completed_count' => $completedAppointments,
-            ]
-        ]);
+        $data[] = [
+            'program' => [
+                'id' => $program->id,
+                'name' => $program->name,
+                'description' => $program->description,
+                'is_active' => $program->is_active,
+                'created_at' => $program->created_at,
+            ],
+            'project_count' => $totalProjects,
+            'completed_project_count' => $completedProjects,
+            'patient_count' => $patientCount,
+        ];
+
+        $totalPatientsOverall += $patientCount;
     }
+
+    // Appointment counts
+    $upcomingAppointments = ScheduledCall::where('volunteer_id', $volunteerId)
+        ->where('status', 'scheduled')
+        ->count();
+
+    $completedAppointments = ScheduledCall::where('volunteer_id', $volunteerId)
+        ->where('status', 'completed')
+        ->count();
+
+    return response()->json([
+        'message' => 'success',
+        'data' => $data,
+        'total_registered_patients' => $totalPatientsOverall,
+        'appointments' => [
+            'upcoming_count' => $upcomingAppointments,
+            'completed_count' => $completedAppointments,
+        ],
+    ]);
+}
+
 }

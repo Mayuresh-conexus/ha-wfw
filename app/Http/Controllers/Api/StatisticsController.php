@@ -157,15 +157,10 @@ class StatisticsController extends Controller
         $volunteerId = $request->input('volunteer_id', auth()->id());
 
         $projects = Project::where('volunteerid', $volunteerId)
-            ->where('is_active', 1)
-            ->select('id', 'programid', 'enddate')
-            ->with([
-                'program' => function ($query) {
-                    $query->where('is_active', 1)
-                        ->select('id', 'name', 'description', 'is_active', 'created_at');
-                }
-            ])
-            ->get();
+    ->where('is_active', 1)
+    ->select('id', 'programid', 'enddate')
+    ->with('program:id,name,description,is_active,created_at')
+    ->get();
 
 
         $grouped = $projects->groupBy('programid');
@@ -182,7 +177,7 @@ class StatisticsController extends Controller
             $completedProjects = $programProjects->filter(fn($p) => $p->enddate && $p->enddate < now())->count();
 
             // Count patients directly assigned to this program
-            $patientCount = Patient::where('programid', $programId)->where('is_active', true)->count();
+            $patientCount = Patient::where('programid', $programId)->count();
 
             $data[] = [
                 'program' => [

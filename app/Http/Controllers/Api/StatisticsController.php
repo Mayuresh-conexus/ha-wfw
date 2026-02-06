@@ -158,7 +158,7 @@ class StatisticsController extends Controller
 
         $projects = Project::where('volunteerid', $volunteerId)
             ->with('program:id,name,description,is_active,created_at')
-            ->select('id', 'programid', 'enddate')
+            ->select('id', 'programid', 'enddate')->where('is_active', 1)
             ->get();
 
         $grouped = $projects->groupBy('programid');
@@ -169,12 +169,7 @@ class StatisticsController extends Controller
         foreach ($grouped as $programId => $programProjects) {
             if ($programId === null) continue;
 
-            $program = $programProjects
-    ->where('is_active', 1)
-    ->first()
-    ?->program;
-
-
+            $program = $programProjects->first()->program;
 
             $totalProjects = $programProjects->count();
             $completedProjects = $programProjects->filter(fn($p) => $p->enddate && $p->enddate < now())->count();

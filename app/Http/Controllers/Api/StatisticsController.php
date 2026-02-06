@@ -169,15 +169,17 @@ class StatisticsController extends Controller
         foreach ($grouped as $programId => $programProjects) {
             if ($programId === null) continue;
 
-            $program = $programProjects->first()->program;
+            $program = $programProjects
+                ->where('is_active', 1)
+                ->first()
+                ->program;
+
 
             $totalProjects = $programProjects->count();
             $completedProjects = $programProjects->filter(fn($p) => $p->enddate && $p->enddate < now())->count();
 
             // Count patients directly assigned to this program
-            $patientCount = Patient::where('programid', $programId)
-                ->where('is_active', 1)
-                ->count();
+            $patientCount = Patient::where('programid', $programId)->where('is_active', true)->count();
 
             $data[] = [
                 'program' => [

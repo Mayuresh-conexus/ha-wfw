@@ -33,9 +33,11 @@ Route::prefix('v1')->group(function () {
         // Route::get('/cities', [LocationController::class, 'cities']);
         Route::get('/statistics/counts', [StatisticsController::class, 'counts']);
         Route::get('/statistics', [StatisticsController::class, 'index']);
+
         //Projects route for volunteer App
         Route::get('/projects/by-program/{programId}', [ProjectController::class, 'byProgram']);
         Route::get('/projects/getAllProjects', [ProjectController::class, 'getAllProjects']);
+
         // Patient
         Route::get('/patients/by-program/{programId}', [PatientController::class, 'byProgram']);
         Route::get('/patients/by-id/{patientId}', [PatientController::class, 'byId']); // Get patient by ID
@@ -51,6 +53,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/locations/countries', [LocationController::class, 'countries']);
         Route::get('/locations/states', [LocationController::class, 'states']);
         Route::get('/locations/cities', [LocationController::class, 'cities']);
+
         // Record APIs
         Route::post('/records', [RecordController::class, 'store']);
         Route::post('/records/{record}', [RecordController::class, 'update']);
@@ -73,14 +76,13 @@ Route::prefix('v1')->group(function () {
 
         //Projects
         Route::get('/projects/by-program/{programId}', [ProjectController::class, 'byProgram']);
+
         // Bulk Question Upload
         Route::post('/questions/bulk', [QuestionBulkUploadController::class, 'store']);
         Route::post('/symptoms/bulk', [SymptomBulkController::class, 'store']);
 
-
         //resourses should be last otherwise it may override other routes
         // Route::apiResource('projects', ProjectController::class);
-
 
         //Medicines
         Route::post('/medicines/bulk', [MedicineController::class, 'bulkStore']);
@@ -88,6 +90,9 @@ Route::prefix('v1')->group(function () {
 
         //Doctor by Patient count for respective program
         Route::get('/records/doctor-patient-count/{projectId}', [RoundRobinController::class, 'index']);
+
+        //volunteer data after login
+        Route::get('/volunteer/{volunteerId}', [RoundRobinController::class, 'volunteerDataById']);
 
 
     });

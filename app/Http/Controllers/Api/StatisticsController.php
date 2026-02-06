@@ -157,10 +157,16 @@ class StatisticsController extends Controller
         $volunteerId = $request->input('volunteer_id', auth()->id());
 
         $projects = Project::where('volunteerid', $volunteerId)
-            ->with('program:id,name,description,is_active,created_at')
+            ->where('is_active', 1)
             ->select('id', 'programid', 'enddate')
-            ->where('is_active', true)
+            ->with([
+                'program' => function ($query) {
+                    $query->where('is_active', 1)
+                        ->select('id', 'name', 'description', 'is_active', 'created_at');
+                }
+            ])
             ->get();
+
 
         $grouped = $projects->groupBy('programid');
 

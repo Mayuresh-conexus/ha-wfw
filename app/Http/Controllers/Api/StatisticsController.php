@@ -175,7 +175,7 @@ class StatisticsController extends Controller
             $completedProjects = $programProjects->filter(fn($p) => $p->enddate && $p->enddate < now())->count();
 
             // Count patients directly assigned to this program
-            $patientCount = Patient::where('programid', $programId)->count();
+            $patientCount = Patient::where('programid', $programId)->where('is_active', 1)->count();
 
             $data[] = [
                 'program' => [

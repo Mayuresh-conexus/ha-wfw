@@ -200,7 +200,7 @@ class PatientController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
+            'email' => 'nullable|max:255',
             'mobile' => 'nullable|string|max:255',
             'dob' => 'nullable|date',
             'gender' => 'nullable|string|max:255',

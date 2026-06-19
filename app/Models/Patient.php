@@ -54,11 +54,11 @@ class Patient extends Model
     ];
 
     protected $casts = [
-        'name' => 'encrypted',
-        'email' => 'encrypted',
-        'mobile' => 'encrypted',
-        'dob' => 'encrypted',
-        'gender' => 'encrypted',
+        // NOTE: name/email/mobile/dob/gender were cast as 'encrypted' in commit 17c6b54,
+        // but existing patient rows are plaintext (no data migration was run), which threw
+        // "DecryptException: The payload is invalid." on every read. Reverted to plaintext.
+        // To encrypt PII at rest later, do it deliberately: settle a stable APP_KEY (not the
+        // one committed in .env), then migrate existing rows before re-adding these casts.
         'smoke' => 'boolean',
         'drinkalcohol' => 'boolean',
         'is_active' => 'boolean',

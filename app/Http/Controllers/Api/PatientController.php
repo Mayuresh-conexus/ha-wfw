@@ -182,10 +182,28 @@ class PatientController extends Controller
     }
 
     /**
+     * Lower-case the height/weight unit inputs (when present) so case variants
+     * such as "CM"/"KG" sent by the mobile app satisfy the lowercase `in:` rules
+     * and are stored consistently.
+     */
+    private function normaliseUnits(Request $request): void
+    {
+        foreach (['heightunit', 'weightunit'] as $field) {
+            $value = $request->input($field);
+
+            if (is_string($value) && $value !== '') {
+                $request->merge([$field => strtolower($value)]);
+            }
+        }
+    }
+
+    /**
      * Create a new patient
      */
     public function store(Request $request)
     {
+        $this->normaliseUnits($request);
+
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email:rfc,dns|max:255',
@@ -310,6 +328,8 @@ class PatientController extends Controller
      */
     public function update(Request $request, Patient $patient)
     {
+        $this->normaliseUnits($request);
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'email' => 'nullable|email:rfc,dns|max:255',

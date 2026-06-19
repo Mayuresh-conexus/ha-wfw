@@ -116,16 +116,22 @@ class QuestionBulkUploadController extends Controller
 
         if (!empty($errors)) {
             return response()->json([
+                'success' => false,
                 'message' => 'Some symptoms failed validation',
                 'errors' => $errors,
-                'successful' => $allResults
+                'data' => [
+                    'successful' => $allResults
+                ]
             ], 422);
         }
 
         return response()->json([
+            'success' => true,
             'message' => 'Bulk upload of multiple symptoms completed',
-            'count' => count($allResults),
-            'results' => $allResults
+            'data' => [
+                'count' => count($allResults),
+                'results' => $allResults
+            ]
         ], 201);
     }
 

@@ -67,12 +67,10 @@ class RecordResource extends Resource
                         'malariaFiles' => [],
                         'hivFiles' => [],
                     ])
-                    ->afterStateHydrated(function (Set $set, Get $get) {
-                        self::fillPatientSummary($set, $get);
-                    })
-                    ->visible(fn (Get $get) => filled($get('patientid')))
                     ->dehydrated(false),
             ])
+            ->collapsible()
+            ->collapsed()
     ->visible(fn (Get $get) => filled($get('patientid'))),
 
 
@@ -130,6 +128,8 @@ class RecordResource extends Resource
                 ->preserveFilenames()
                 ->multiple()
                 ->reorderable()
+                ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf', 'image/jpg'])
+                ->maxSize(5120)
                 ->appendFiles()
                 ->dehydrateStateUsing(function ($state) {
                     // Ensure DB stores JSON array of paths
@@ -164,9 +164,8 @@ class RecordResource extends Resource
                         $ids = $record->doctorid ?? [];
                         $ids = is_array($ids) ? $ids : (json_decode($ids, true) ?? []);
                         $ids = array_values(array_filter(array_map('intval', $ids)));
-
                         return \App\Models\User::whereIn('id', $ids)->pluck('name')->implode(', ') ?: '-';
-                    }),
+                    })->visibleFrom('lg'),
 
                 Tables\Columns\TextColumn::make('gpid')
                     ->label('GPs')
@@ -174,28 +173,34 @@ class RecordResource extends Resource
                         $ids = $record->gpid ?? [];
                         $ids = is_array($ids) ? $ids : (json_decode($ids, true) ?? []);
                         $ids = array_values(array_filter(array_map('intval', $ids)));
-
                         return \App\Models\User::whereIn('id', $ids)->pluck('name')->implode(', ') ?: '-';
-                    }),
+                    })->visibleFrom('lg'),
 
                 Tables\Columns\TextColumn::make('volunteer.name')
-                    ->label('Volunteer Name')
+                    ->label('Volunteer')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('md'),
 
                 Tables\Columns\TextColumn::make('program.name')
                     ->label('Program')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('project.name')
                     ->label('Project')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('status')->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
+            ->headerActions([
+                Tables\Actions\ExportAction::make()
+                    ->exporter(\App\Filament\Exports\RecordExporter::class),
+            ])
             ->actions([
                 EditAction::make()
                     ->modalHeading('Edit Recored')
@@ -209,6 +214,8 @@ class RecordResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ExportBulkAction::make()
+                        ->exporter(\App\Filament\Exports\RecordExporter::class),
                 ]),
             ]);
     }

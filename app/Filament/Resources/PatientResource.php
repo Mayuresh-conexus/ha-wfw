@@ -77,6 +77,8 @@ class PatientResource extends Resource
                 ->preserveFilenames()
                 ->multiple()
                 ->reorderable()
+                ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf', 'image/jpg'])
+                ->maxSize(5120)
                 ->appendFiles()
                 ->dehydrateStateUsing(function ($state) {
                     // Ensure DB stores JSON array of paths
@@ -92,6 +94,8 @@ class PatientResource extends Resource
                 ->preserveFilenames()
                 ->multiple()
                 ->reorderable()
+                ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf', 'image/jpg'])
+                ->maxSize(5120)
                 ->appendFiles()
                 ->dehydrateStateUsing(function ($state) {
                     // Ensure DB stores JSON array of paths
@@ -122,6 +126,8 @@ class PatientResource extends Resource
                 ->preserveFilenames()
                 ->multiple()
                 ->reorderable()
+                ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf', 'image/jpg'])
+                ->maxSize(5120)
                 ->appendFiles()
                 ->dehydrateStateUsing(function ($state) {
                     // Ensure DB stores JSON array of paths
@@ -136,6 +142,8 @@ class PatientResource extends Resource
                 ->preserveFilenames()
                 ->multiple()
                 ->reorderable()
+                ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf', 'image/jpg'])
+                ->maxSize(5120)
                 ->appendFiles()
                 ->dehydrateStateUsing(function ($state) {
                     // Ensure DB stores JSON array of paths
@@ -185,7 +193,10 @@ class PatientResource extends Resource
 
 
             Grid::make(2)->schema([
-                FileUpload::make('profile')->label('Profile Picture'),
+                FileUpload::make('profile')
+                    ->label('Profile Picture')
+                    ->image()
+                    ->maxSize(5120),
                 Textarea::make('additionalcomment')->label('Additional Comment')->rows(3),
             ]),
 
@@ -206,7 +217,7 @@ class PatientResource extends Resource
             ->columns([
                 TextColumn::make('name')->sortable()->searchable(),
                 TextColumn::make('filenumber')->sortable()->searchable(),
-                TextColumn::make('mobile'),
+                TextColumn::make('mobile')->visibleFrom('md'),
                 BadgeColumn::make('is_active')
                     ->label('Status')
                     ->getStateUsing(fn($record) => $record->is_active ? 'Active' : 'Inactive')
@@ -214,15 +225,24 @@ class PatientResource extends Resource
                         'success' => fn($state) => $state === 'Active',
                         'danger' => fn($state) => $state === 'Inactive',
                     ]),
-                TextColumn::make('dob')->date(),
+                TextColumn::make('dob')->date()->visibleFrom('lg'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([])
+            ->headerActions([
+                Tables\Actions\ExportAction::make()
+                    ->exporter(\App\Filament\Exports\PatientExporter::class),
+            ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->icon('heroicon-o-pencil'),
             ])
             ->bulkActions([
-                DeleteBulkAction::make(),
+                Tables\Actions\BulkActionGroup::make([
+                    DeleteBulkAction::make()->icon('heroicon-o-trash'),
+                    Tables\Actions\ExportBulkAction::make()
+                        ->exporter(\App\Filament\Exports\PatientExporter::class)
+                        ->icon('heroicon-o-arrow-down-tray'),
+                ]),
             ]);
     }
 

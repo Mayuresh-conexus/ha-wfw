@@ -3,9 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Patient extends Model
 {
+    use LogsActivity, SoftDeletes;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty();
+    }
     protected $fillable = [
         'name',
         'filenumber',
@@ -43,6 +54,11 @@ class Patient extends Model
     ];
 
     protected $casts = [
+        'name' => 'encrypted',
+        'email' => 'encrypted',
+        'mobile' => 'encrypted',
+        'dob' => 'encrypted',
+        'gender' => 'encrypted',
         'smoke' => 'boolean',
         'drinkalcohol' => 'boolean',
         'is_active' => 'boolean',
@@ -55,11 +71,11 @@ class Patient extends Model
 
     public function records()
     {
-        return $this->hasMany(Record::class, 'patientid');
+        return $this->hasMany(Record::class , 'patientid');
     }
 
     public function program()
     {
-        return $this->belongsTo(Program::class, 'programid');
+        return $this->belongsTo(Program::class , 'programid');
     }
 }

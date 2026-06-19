@@ -8,52 +8,48 @@ use App\Models\Program;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PatientController extends Controller
 {
-        /** Get all petients by petients id */
+    /**
+     * Get program IDs the authenticated volunteer has access to
+     */
+    private function getVolunteerProgramIds(): array
+    {
+        return Project::where('volunteerid', auth()->id())
+            ->where('is_active', 1)
+            ->whereNotNull('programid')
+            ->pluck('programid')
+            ->unique()
+            ->values()
+            ->toArray();
+    }
 
-    public function byId($patientId){
+    /** Get patient by ID (scoped to volunteer's programs) */
+
+    public function byId($patientId)
+    {
+
+        $programIds = $this->getVolunteerProgramIds();
+
+        $defaultFields = [
+            'id', 'name', 'filenumber', 'email', 'mobile', 'dob', 'gender',
+            'height', 'heightunit', 'weight', 'weightunit', 'smoke', 'drinkalcohol',
+            'generalhealth', 'generalhealthupload', 'reasonvisit', 'reasontovisit',
+            'bp', 'heartrate', 'temperature', 'occupation', 'preferredphysician',
+            'oxygensaturation', 'is_active', 'profile', 'medication', 'medicationupload',
+            'familyhealthreason', 'malariatest', 'malariatestupload', 'hivtest',
+            'hivtestupload', 'additionalcomment', 'programid'
+        ];
+
+        $fields = $this->getSelectFields(request(), $defaultFields);
 
         $patient = Patient::query()
             ->where('id', $patientId)
-            ->select([
-                'id',
-                'name',
-        'filenumber',
-        'email',
-        'mobile',
-        'dob',
-        'gender',
-        'height',
-        'heightunit',
-        'weight',
-        'weightunit',
-        'smoke',
-        'drinkalcohol',
-        'generalhealth',
-        'generalhealthupload',
-        'reasonvisit',
-        'reasontovisit',
-        'bp',
-        'heartrate',
-        'temperature',
-        'occupation',
-        'preferredphysician',
-        'oxygensaturation',
-        'is_active',
-        'profile',
-        'medication',
-        'medicationupload',
-        'familyhealthreason',
-        'malariatest',
-        'malariatestupload',
-        'hivtest',
-        'hivtestupload',
-        'additionalcomment',
-        'programid',
-
-    ])->first();
+            ->whereIn('programid', $programIds)
+            ->select($fields)
+            ->first();
 
         if (!$patient) {
             return response()->json([
@@ -62,6 +58,8 @@ class PatientController extends Controller
             ], 404);
         }
 
+        activity()->performedOn($patient)->log('viewed_patient_details');
+
         return response()->json([
             'success' => true,
             'message' => 'Patient retrieved successfully',
@@ -69,21 +67,28 @@ class PatientController extends Controller
         ]);
     }
 
-    public function list(){
-        $patients = Patient::query()
-            ->select([
-                'id',
-                'name',
-                'filenumber',
+    public function list()
+    {
+        $programIds = $this->getVolunteerProgramIds();
 
-            ])
+        $fields = $this->getSelectFields(request(), ['id', 'name', 'filenumber', 'created_at']);
+
+        $patients = Patient::query()
+            ->whereIn('programid', $programIds)
+            ->select($fields)
             ->latest()
-            ->get();        
+            ->paginate(15);
 
         return response()->json([
             'success' => true,
             'message' => 'Patients retrieved successfully',
-            'data' => $patients,
+            'data' => $patients->items(),
+            'meta' => [
+                'current_page' => $patients->currentPage(),
+                'last_page' => $patients->lastPage(),
+                'per_page' => $patients->perPage(),
+                'total' => $patients->total(),
+            ]
         ]);
     }
 
@@ -106,49 +111,26 @@ class PatientController extends Controller
             ]);
         }
 
+        $defaultFields = [
+            'id', 'name', 'filenumber', 'email', 'mobile', 'dob', 'gender',
+            'height', 'heightunit', 'weight', 'weightunit', 'smoke', 'drinkalcohol',
+            'generalhealth', 'generalhealthupload', 'reasonvisit', 'reasontovisit',
+            'bp', 'heartrate', 'temperature', 'occupation', 'preferredphysician',
+            'oxygensaturation', 'is_active', 'profile', 'medication', 'medicationupload',
+            'familyhealthreason', 'malariatest', 'malariatestupload', 'hivtest',
+            'hivtestupload', 'additionalcomment', 'programid', 'created_at'
+        ];
+
+        $fields = $this->getSelectFields(request(), $defaultFields);
+
         $patients = Patient::query()
             ->where('programid', $programId)
-            ->select([
-                'id',
-                'name',
-                'filenumber',
-                'email',
-                'mobile',
-                'dob',
-                'gender',
-                'height',
-                'heightunit',
-                'weight',
-                'weightunit',
-                'smoke',
-                'drinkalcohol',
-                'generalhealth',
-                'generalhealthupload',
-                'reasonvisit',
-                'reasontovisit',
-                'bp',
-                'heartrate',
-                'temperature',
-                'occupation',
-                'preferredphysician',
-                'oxygensaturation',
-                'is_active',
-                'profile',
-                'medication',
-                'medicationupload',
-                'familyhealthreason',
-                'malariatest',
-                'malariatestupload',
-                'hivtest',
-                'hivtestupload',
-                'additionalcomment',
-                'programid',
-            ])
+            ->select($fields)
             ->latest()
-            ->get();
+            ->paginate(15);
 
         // Add full absolute URLs using APP_URL
-        $patients->transform(function ($patient) {
+        $patients->getCollection()->transform(function ($patient) {
             $patient->generalhealthupload = $this->getImageUrls($patient->generalhealthupload, $patient->filenumber);
             $patient->medicationupload = $this->getImageUrls($patient->medicationupload, $patient->filenumber);
             $patient->malariatestupload = $this->getImageUrls($patient->malariatestupload, $patient->filenumber);
@@ -160,8 +142,14 @@ class PatientController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Patients retrieved successfully',
-            'data' => $patients,
-            'total_patients' => $patients->count(),
+            'data' => $patients->items(),
+            'total_patients' => $patients->total(),
+            'meta' => [
+                'current_page' => $patients->currentPage(),
+                'last_page' => $patients->lastPage(),
+                'per_page' => $patients->perPage(),
+                'total' => $patients->total(),
+            ]
         ]);
     }
 
@@ -169,29 +157,29 @@ class PatientController extends Controller
      * Helper to generate FULL absolute URLs with APP_URL
      */
     private function getImageUrls($paths, $filenumber, $single = false)
-        {
-            $appUrl = rtrim(env('APP_URL', 'http://localhost'), '/');
-        
-            if ($single) {
-                // profile is currently stored as filename only in your code
-                // if you keep it as filename: return $paths ? $appUrl . '/storage/patients/' . $filenumber . '/' . $paths : null;
-                // if you also switch profile to store full path, use the same logic as below:
-                return $paths ? $appUrl . '/storage/' . ltrim($paths, '/') : null;
-            }
-        
-            if (!$paths) {
-                return [];
-            }
-        
-            // decode JSON string or accept array
-            $decoded = is_string($paths) ? json_decode($paths, true) : $paths;
-            $decoded = is_array($decoded) ? $decoded : [$paths];
-        
-            return array_map(function ($path) use ($appUrl) {
-                // path is like "patients/IN2382/Frame 7.png"
-                return $appUrl . '/storage/' . ltrim($path, '/');
-            }, $decoded);
+    {
+        $appUrl = rtrim(config('app.url', 'http://localhost'), '/');
+
+        if ($single) {
+            // profile is currently stored as filename only in your code
+            // if you keep it as filename: return $paths ? $appUrl . '/storage/patients/' . $filenumber . '/' . $paths : null;
+            // if you also switch profile to store full path, use the same logic as below:
+            return $paths ? $appUrl . '/storage/' . ltrim($paths, '/') : null;
         }
+
+        if (!$paths) {
+            return [];
+        }
+
+        // decode JSON string or accept array
+        $decoded = is_string($paths) ? json_decode($paths, true) : $paths;
+        $decoded = is_array($decoded) ? $decoded : [$paths];
+
+        return array_map(function ($path) use ($appUrl) {
+            // path is like "patients/IN2382/Frame 7.png"
+            return $appUrl . '/storage/' . ltrim($path, '/');
+        }, $decoded);
+    }
 
     /**
      * Create a new patient
@@ -200,14 +188,14 @@ class PatientController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'mobile' => 'nullable|string|max:255',
-            'dob' => 'nullable|date',
-            'gender' => 'nullable|string|max:255',
-            'height' => 'nullable|numeric',
-            'heightunit' => 'nullable|string',
-            'weight' => 'nullable|numeric',
-            'weightunit' => 'nullable|string',
+            'email' => 'nullable|email:rfc,dns|max:255',
+            'mobile' => ['nullable', 'string', 'max:20', 'regex:/^[\d\+\-\s]+$/'],
+            'dob' => 'nullable|date|before_or_equal:today',
+            'gender' => 'nullable|string|in:Male,Female,Other',
+            'height' => 'nullable|numeric|min:0|max:300',
+            'heightunit' => 'nullable|string|in:cm,inch',
+            'weight' => 'nullable|numeric|min:0|max:500',
+            'weightunit' => 'nullable|string|in:kg,lbs',
             'smoke' => 'boolean',
             'drinkalcohol' => 'boolean',
             'generalhealth' => 'nullable|string',
@@ -237,6 +225,35 @@ class PatientController extends Controller
             'is_active' => 'boolean',
         ]);
 
+        $programIds = $this->getVolunteerProgramIds();
+        if (isset($data['programid']) && !in_array($data['programid'], $programIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to this program.'
+            ], 403);
+        }
+
+        // D-03: Duplicate Patient Record Prevention (in-memory because fields are encrypted)
+        $patientsToCheck = Patient::whereIn('programid', $programIds)->get();
+        $duplicate = $patientsToCheck->first(function ($p) use ($data) {
+            $isSameName = strtolower(trim($p->name)) === strtolower(trim($data['name']));
+            $isSameGender = isset($data['gender']) ? ($p->gender === $data['gender']) : true;
+            $isSameDob = isset($data['dob']) && $p->dob ? \Carbon\Carbon::parse($p->dob)->isSameDay($data['dob']) : true;
+            $isSameMobile = !empty($data['mobile']) ? ($p->mobile === $data['mobile']) : true;
+
+            // Strict match on name + DOB + gender to prevent dupes
+            // If mobile is provided, it must also match.
+            return $isSameName && $isSameGender && $isSameDob && $isSameMobile;
+        });
+
+        if ($duplicate) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A patient with these details already exists.',
+                'data' => clone $duplicate,
+            ], 409); // 409 Conflict
+        }
+
         // Generate unique filenumber
         do {
             $filenumber = 'IN' . mt_rand(1000, 9999);
@@ -251,32 +268,30 @@ class PatientController extends Controller
         // Handle profile (single file)
         if ($request->hasFile('profile')) {
             $file = $request->file('profile');
-            $fileName = $file->getClientOriginalName();
+            $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
             $file->storeAs($folderPath, $fileName, 'public');
             $data['profile'] = 'patients/' . $filenumber . '/' . $fileName;
         }
 
 
         // Handle multiple file fields (store relative paths)
-            $multiFields = ['generalhealthupload', 'medicationupload', 'malariatestupload', 'hivtestupload'];
-            
-            foreach ($multiFields as $field) {
-                if ($request->hasFile($field)) {
-                    $paths = [];
-            
-                    foreach ($request->file($field) as $file) {
-                        $fileName = $file->getClientOriginalName();
-            
-                        // storeAs returns path only if you capture it via $path; but easiest is to build it yourself
-                        $file->storeAs($folderPath, $fileName, 'public');
-            
-                        // store relative path including folder
-                        $paths[] = $folderPath . '/' . $fileName;   // patients/IN2382/Frame 7.png
-                    }
-            
-                    $data[$field] = $paths;
+        $multiFields = ['generalhealthupload', 'medicationupload', 'malariatestupload', 'hivtestupload'];
+
+        foreach ($multiFields as $field) {
+            if ($request->hasFile($field)) {
+                $paths = [];
+
+                foreach ($request->file($field) as $file) {
+                    $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+                    $file->storeAs($folderPath, $fileName, 'public');
+
+                    $paths[] = $folderPath . '/' . $fileName;
                 }
+
+                $data[$field] = $paths;
             }
+        }
 
 
         $patient = Patient::create($data);
@@ -297,14 +312,14 @@ class PatientController extends Controller
     {
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'mobile' => 'nullable|string|max:255',
-            'dob' => 'nullable|date',
-            'gender' => 'nullable|string|max:255',
-            'height' => 'nullable|numeric',
-            'heightunit' => 'nullable|string',
-            'weight' => 'nullable|numeric',
-            'weightunit' => 'nullable|string',
+            'email' => 'nullable|email:rfc,dns|max:255',
+            'mobile' => ['nullable', 'string', 'max:20', 'regex:/^[\d\+\-\s]+$/'],
+            'dob' => 'nullable|date|before_or_equal:today',
+            'gender' => 'nullable|string|in:Male,Female,Other',
+            'height' => 'nullable|numeric|min:0|max:300',
+            'heightunit' => 'nullable|string|in:cm,inch',
+            'weight' => 'nullable|numeric|min:0|max:500',
+            'weightunit' => 'nullable|string|in:kg,lbs',
             'smoke' => 'sometimes|boolean',
             'drinkalcohol' => 'sometimes|boolean',
             'generalhealth' => 'nullable|string',
@@ -333,6 +348,21 @@ class PatientController extends Controller
             'programid' => 'nullable|integer|exists:programs,id',
             'is_active' => 'sometimes|boolean',
         ]);
+
+        $programIds = $this->getVolunteerProgramIds();
+        if (!in_array($patient->programid, $programIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to this patient.'
+            ], 403);
+        }
+
+        if (isset($validated['programid']) && !in_array($validated['programid'], $programIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to assign patient to this program.'
+            ], 403);
+        }
 
         $folderPath = 'patients/' . $patient->filenumber;
 
@@ -399,12 +429,12 @@ class PatientController extends Controller
         // Profile (replace)
         if ($request->hasFile('profile')) {
             if ($patient->profile) {
-                Storage::disk('public')->delete($folderPath . '/' . $patient->profile);
+                Storage::disk('public')->delete($patient->profile);
             }
             $file = $request->file('profile');
-            $fileName = $file->getClientOriginalName();
+            $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
             $file->storeAs($folderPath, $fileName, 'public');
-            $updateData['profile'] = $fileName;
+            $updateData['profile'] = $folderPath . '/' . $fileName;
         }
 
         // Multiple file fields (append)
@@ -413,19 +443,19 @@ class PatientController extends Controller
         foreach ($multiFields as $field) {
             if ($request->hasFile($field)) {
                 $oldPaths = [];
-        
+
                 if ($patient->$field) {
                     $decoded = json_decode($patient->$field, true);
                     $oldPaths = is_array($decoded) ? $decoded : [];
                 }
-        
+
                 foreach ($request->file($field) as $file) {
-                    $fileName = $file->getClientOriginalName();
+                    $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
                     $file->storeAs($folderPath, $fileName, 'public');
-        
-                    $oldPaths[] = $folderPath . '/' . $fileName; // patients/{filenumber}/{filename}
+
+                    $oldPaths[] = $folderPath . '/' . $fileName;
                 }
-        
+
                 $updateData[$field] = array_values(array_unique($oldPaths));
             }
         }

@@ -23,6 +23,7 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             return response()->json([
+                'success' => false,
                 'message' => 'Invalid credentials.'
             ], 401);
         }
@@ -30,6 +31,7 @@ class AuthController extends Controller
         // Only volunteers can login via mobile
         if (! $user->hasRole('volunteer')) {
             return response()->json([
+                'success' => false,
                 'message' => 'Access denied. Only volunteers can log in via mobile app.'
             ], 403);
         }
@@ -86,15 +88,20 @@ class AuthController extends Controller
 
         
         return response()->json([
-            'message'   => 'success',
-            'token'     => $token,
-            'token_type' => 'Bearer',
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $role,
-            'gender' => $user->gender,
-            'programs'  => $programs,
+            'success'   => true,
+            'message'   => 'Login successful',
+            'data'      => [
+                'token'      => $token,
+                'token_type' => 'Bearer',
+                'user'       => [
+                    'id'      => $user->id,
+                    'name'    => $user->name,
+                    'email'   => $user->email,
+                    'role'    => $role,
+                    'gender'  => $user->gender,
+                ],
+                'programs'   => $programs,
+            ]
         ]);
     }
 
@@ -103,9 +110,11 @@ class AuthController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
+            'success' => true,
+            'message' => 'User profile retrieved',
+            'data'    => [
+                'id'    => $user->id,
+                'name'  => $user->name,
                 'email' => $user->email,
             ],
         ]);
@@ -117,6 +126,7 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()?->delete();
 
         return response()->json([
+            'success' => true,
             'message' => 'Logged out successfully from this device.',
         ]);
     }
@@ -127,6 +137,7 @@ class AuthController extends Controller
         $request->user()->tokens()->delete();
 
         return response()->json([
+            'success' => true,
             'message' => 'Logged out from all devices.',
         ]);
     }

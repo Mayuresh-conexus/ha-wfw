@@ -10,6 +10,11 @@ class EditRecord extends BaseEditRecord
 {
     protected static string $resource = RecordResource::class;
 
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return 'Medical record updated successfully.';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

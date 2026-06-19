@@ -18,12 +18,16 @@ use App\Http\Controllers\Api\RoundRobinController;
 
 
 
-
-
-
 Route::prefix('v1')->group(function () {
-    Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
     Route::get('/symptoms-with-questions', [SymptomController::class, 'getSymptomsWithQuestions']);
+    Route::get('/health', function () {
+        return response()->json([
+            'success' => true,
+            'status' => 'ok',
+            'timestamp' => now()->toIso8601String(),
+        ]);
+    });
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/auth/me', [AuthController::class, 'me']);
@@ -59,6 +63,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/records/{record}', [RecordController::class, 'update']);
         Route::get('/records/by-patient/{patientId}', [RecordController::class, 'byPatient']);
         Route::get('/records/by-project/{projectId}', [RecordController::class, 'byProject']); // New
+        
+        // Sync API
+        Route::get('/sync/pull', [\App\Http\Controllers\Api\SyncController::class, 'pull']);
+        Route::post('/sync/push', [\App\Http\Controllers\Api\SyncController::class, 'push']);
 
         // Support APIs for dropdowns
         Route::get('/records/doctors', [RecordController::class, 'doctors']);

@@ -59,7 +59,8 @@ class UserResource extends Resource
         Forms\Components\TextInput::make('password')
             ->password()
             ->required(fn ($livewire) => $livewire instanceof Pages\CreateUser)
-            ->dehydrateStateUsing(fn ($state) => bcrypt($state)),
+            ->dehydrated(fn ($state) => filled($state))
+            ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null),
 
         // Role dropdown
         Forms\Components\Select::make('roles')

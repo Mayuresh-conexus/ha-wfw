@@ -19,21 +19,29 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Filament\Widgets\PatientsPerProgram;
-use App\Filament\Widgets\TotalPatientsWidget;
-use App\Filament\Widgets\ActiveProjectsWidget;
-use App\Filament\Widgets\MonthlyRecordsWidget;
 use App\Filament\Widgets\AdminStatsWidget;
+use App\Filament\Widgets\PatientTrendWidget;
 
 
 class AdminPanelProvider extends PanelProvider
 {
+    public function register(): void
+    {
+        file_put_contents(base_path('executed_register.txt'), 'REGISTER CALLED');
+        parent::register();
+    }
+
     public function panel(Panel $panel): Panel
     {
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->font('Inter')
+            ->brandName('HealthApp Admin')
+            ->profile()
+            ->login(\App\Filament\Pages\Auth\CustomLogin::class)
+            ->passwordReset()
             ->colors([
     'primary' => Color::Teal,     // main brand, buttons, active states
     'gray'    => Color::Slate,    // neutrals, borders, text hierarchy
@@ -53,8 +61,7 @@ class AdminPanelProvider extends PanelProvider
                 // Widgets\FilamentInfoWidget::class,
                AdminStatsWidget::class,
                PatientsPerProgram::class,
-              
-
+               PatientTrendWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -69,9 +76,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
+                \Stephenjude\FilamentTwoFactorAuthentication\TwoFactorAuthenticationPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,
             ]);
     }
 }
+// test modify

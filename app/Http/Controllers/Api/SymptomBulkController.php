@@ -47,9 +47,12 @@ class SymptomBulkController extends Controller
         });
 
         return response()->json([
+            'success' => true,
             'message'   => 'Symptoms bulk created successfully',
-            'count'     => count($results),
-            'symptoms'  => $results,
+            'data' => [
+                'count'     => count($results),
+                'symptoms'  => $results,
+            ]
         ], 201);
     }
 }

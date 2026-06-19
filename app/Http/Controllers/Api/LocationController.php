@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class LocationController extends Controller
 {
@@ -16,9 +17,9 @@ class LocationController extends Controller
      */
     public function countries()
     {
-        $countries = Country::select('id', 'name')
-            ->orderBy('name')
-            ->get();
+        $countries = Cache::remember('locations.countries', now()->addHours(24), function () {
+            return Country::select('id', 'name')->orderBy('name')->get();
+        });
 
         return response()->json([
             'success' => true,
@@ -37,10 +38,14 @@ class LocationController extends Controller
             'country_id' => 'required|integer|exists:countries,id',
         ]);
 
-        $states = State::select('id', 'name')
-            ->where('countryid', $request->country_id)
-            ->orderBy('name')
-            ->get();
+        $countryId = $request->country_id;
+
+        $states = Cache::remember("locations.states.{$countryId}", now()->addHours(24), function () use ($countryId) {
+            return State::select('id', 'name')
+                ->where('countryid', $countryId)
+                ->orderBy('name')
+                ->get();
+        });
 
         return response()->json([
             'success' => true,
@@ -59,10 +64,14 @@ class LocationController extends Controller
             'state_id' => 'required|integer|exists:states,id',
         ]);
 
-        $cities = City::select('id', 'name')
-            ->where('stateid', $request->state_id)
-            ->orderBy('name')
-            ->get();
+        $stateId = $request->state_id;
+
+        $cities = Cache::remember("locations.cities.{$stateId}", now()->addHours(24), function () use ($stateId) {
+            return City::select('id', 'name')
+                ->where('stateid', $stateId)
+                ->orderBy('name')
+                ->get();
+        });
 
         return response()->json([
             'success' => true,

@@ -59,7 +59,11 @@ class RoundRobinController extends Controller
             ];
         })->values();
 
-        return response()->json($response);
+        return response()->json([
+            'success' => true,
+            'message' => 'Doctor-patient counts retrieved successfully',
+            'data'    => $response,
+        ]);
     }
 
 
@@ -72,6 +76,7 @@ class RoundRobinController extends Controller
     // Ensure the user is a volunteer
     if (! $user->hasRole('volunteer')) {
         return response()->json([
+            'success' => false,
             'message' => 'Access denied. User is not a volunteer.'
         ], 403);
     }
@@ -124,13 +129,16 @@ class RoundRobinController extends Controller
         ->values();
 
     return response()->json([
-        'message' => 'success',
-        'id' => $user->id,
-        'name' => $user->name,
-        'email' => $user->email,
-        'role' => $role,
-        'gender' => $user->gender,
-        'programs' => $programs,
+        'success' => true,
+        'message' => 'Volunteer data retrieved successfully',
+        'data'    => [
+            'id'       => $user->id,
+            'name'     => $user->name,
+            'email'    => $user->email,
+            'role'     => $role,
+            'gender'   => $user->gender,
+            'programs' => $programs,
+        ],
     ]);
 }
 

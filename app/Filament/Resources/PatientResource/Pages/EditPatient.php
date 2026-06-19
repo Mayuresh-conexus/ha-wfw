@@ -10,6 +10,11 @@ class EditPatient extends EditRecord
 {
     protected static string $resource = PatientResource::class;
 
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return 'Patient record updated successfully.';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

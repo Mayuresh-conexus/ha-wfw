@@ -140,7 +140,8 @@ class StatisticsController extends Controller
             ->get();
 
         return response()->json([
-            'message' => 'success',
+            'success' => true,
+            'message' => 'Statistics retrieved successfully',
             'data' => $data,
             'total_registered_patients' => $totalPatientsOverall,
             'appointments' => [
@@ -222,7 +223,8 @@ class StatisticsController extends Controller
         ->count();
 
     return response()->json([
-        'message' => 'success',
+        'success' => true,
+        'message' => 'Counts retrieved successfully',
         'data' => $data,
         'total_registered_patients' => $totalPatientsOverall,
         'appointments' => [

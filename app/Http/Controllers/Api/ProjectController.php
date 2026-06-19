@@ -10,6 +10,8 @@ class ProjectController extends Controller
 {
     public function index()
     {
+        $fields = $this->getSelectFields(request(), ['*']); // Default to all if not specified
+
         $projects = Project::query()
             ->with([
                 'program:id,name',
@@ -18,10 +20,15 @@ class ProjectController extends Controller
                 'city:id,name',
             ])
             ->where('volunteerid', auth()->id())
+            ->select($fields)
             ->latest()
             ->get();
 
-        return response()->json(['data' => $projects]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Projects retrieved successfully',
+            'data' => $projects,
+        ]);
     }
 
 
@@ -59,6 +66,8 @@ class ProjectController extends Controller
         }
 
         return response()->json([
+            'success' => true,
+            'message' => 'Project created successfully',
             'data' => $project->load(['program', 'country', 'state', 'city', 'gps']),
         ], 201);
     }
@@ -104,6 +113,8 @@ class ProjectController extends Controller
         }
 
         return response()->json([
+            'success' => true,
+            'message' => 'Project updated successfully',
             'data' => $project->load(['program', 'country', 'state', 'city', 'gps']),
         ]);
     }
@@ -112,7 +123,10 @@ class ProjectController extends Controller
     {
         $project->delete();
 
-        return response()->json(['message' => 'Deleted']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Project deleted successfully',
+        ]);
     }
 
 
@@ -121,21 +135,13 @@ class ProjectController extends Controller
         // Validate program exists
         \App\Models\Program::findOrFail($programId);
 
+        $fields = $this->getSelectFields(request(), [
+            'id', 'name', 'description', 'startdate', 'enddate', 'budget', 'countryid', 'stateid', 'cityid', 'othercity', 'is_active'
+        ]);
+
         $projects = Project::query()
             ->where('programid', $programId)
-            ->select([
-                'id',
-                'name',
-                'description',
-                'startdate',
-                'enddate',
-                'budget',
-                'countryid',
-                'stateid',
-                'cityid',
-                'othercity',
-                'is_active',
-            ])
+            ->select($fields)
             ->with([
                 'country:id,name',
                 'state:id,name',

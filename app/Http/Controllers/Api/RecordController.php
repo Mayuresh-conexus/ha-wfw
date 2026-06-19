@@ -60,7 +60,8 @@ class RecordController extends Controller
     $folder = 'patients/signature/' . $validated['patientid'];
 
     foreach ($request->file('attachments') as $file) {
-        $paths[] = $file->storeAs($folder, $file->getClientOriginalName(), 'public');
+        $safeName = \Illuminate\Support\Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $paths[] = $file->storeAs($folder, $safeName, 'public');
     }
 
     $data['attachments'] = array_values($paths);
@@ -176,8 +177,7 @@ class RecordController extends Controller
             return [];
         }
 
-        // Get APP_URL from .env with fallback
-        $appUrl = rtrim(env('APP_URL', 'http://localhost:8000'), '/');
+        $appUrl = rtrim(config('app.url', 'http://localhost'), '/');
 
         // Paths are already stored as ['records/attachments/file.jpg', ...]
         return array_map(function ($path) use ($appUrl) {
@@ -194,12 +194,17 @@ class RecordController extends Controller
         // Validate patient exists
         $patient = Patient::findOrFail($patientId);
 
+        $fields = $this->getSelectFields(request(), [
+            'id', 'patientid', 'volunteerid', 'projectid', 'programid', 'status', 'doctorid', 'gpid', 'symptom_ids', 'question_summary', 'notes', 'attachments', 'created_at'
+        ]);
+
         // Get all records for this patient by current volunteer
         $records = Record::where('patientid', $patientId)
             ->where('volunteerid', auth()->id())
             ->with(['scheduledCall.assignedDoctor']) // Load appointment + doctor
+            ->select($fields)
             ->latest()
-            ->get();
+            ->paginate(15);
 
         // Helper to safely decode JSON or return array as-is
         $safeJsonDecode = function ($value) {
@@ -210,7 +215,7 @@ class RecordController extends Controller
         };
 
         // Transform records
-        $records->transform(function ($record) use ($safeJsonDecode) {
+        $records->getCollection()->transform(function ($record) use ($safeJsonDecode) {
             // Doctor names
             $doctorNames = [];
             $doctorIds = $safeJsonDecode($record->doctorid);
@@ -269,7 +274,7 @@ class RecordController extends Controller
         });
 
         // Patient image URLs
-        $appUrl = rtrim(env('APP_URL', 'http://localhost:8000'), '/');
+        $appUrl = rtrim(config('app.url', 'http://localhost'), '/');
         $patientFolder = $patient->filenumber ? "patients/{$patient->filenumber}" : 'patients/temp';
 
         $patientData = $patient->toArray();
@@ -299,9 +304,15 @@ class RecordController extends Controller
             'message' => 'Patient records and appointments retrieved successfully',
             'data' => [
                 'patient' => $patientData,
-                'records' => $records,
+                'records' => $records->items(),
             ],
-            'total_records' => $records->count(),
+            'total_records' => $records->total(),
+            'meta' => [
+                'current_page' => $records->currentPage(),
+                'last_page' => $records->lastPage(),
+                'per_page' => $records->perPage(),
+                'total' => $records->total(),
+            ]
         ]);
     }
 
@@ -311,10 +322,12 @@ class RecordController extends Controller
      */
     public function doctors()
     {
-        $doctors = User::role('doctor')
-            ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+        $doctors = \Illuminate\Support\Facades\Cache::remember('records.doctors', now()->addHours(12), function () {
+            return User::role('doctor')
+                ->select('id', 'name')
+                ->orderBy('name')
+                ->get();
+        });
 
         return response()->json([
             'success' => true,
@@ -329,10 +342,12 @@ class RecordController extends Controller
      */
     public function gps()
     {
-        $gps = User::role('gp')
-            ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+        $gps = \Illuminate\Support\Facades\Cache::remember('records.gps', now()->addHours(12), function () {
+            return User::role('gp')
+                ->select('id', 'name')
+                ->orderBy('name')
+                ->get();
+        });
 
         return response()->json([
             'success' => true,
@@ -371,13 +386,19 @@ class RecordController extends Controller
             ])
             ->orderBy('schedule_date', 'desc')
             ->orderBy('schedule_start_time', 'desc')
-            ->get();
+            ->paginate(15);
 
         return response()->json([
             'success' => true,
             'message' => 'Appointments retrieved successfully',
-            'data' => $appointments,
-            'total' => $appointments->count(),
+            'data' => $appointments->items(),
+            'total' => $appointments->total(),
+            'meta' => [
+                'current_page' => $appointments->currentPage(),
+                'last_page' => $appointments->lastPage(),
+                'per_page' => $appointments->perPage(),
+                'total' => $appointments->total(),
+            ]
         ]);
     }
 
@@ -393,15 +414,17 @@ class RecordController extends Controller
             ->with(['program', 'city.state.country'])
             ->firstOrFail();
 
+        $fields = $this->getSelectFields(request(), ['id', 'name', 'filenumber', 'mobile', 'gender', 'dob']);
+
         // Get unique patients who have records in this project
         $patients = Patient::whereIn('id', function ($query) use ($projectId) {
             $query->select('patientid')
                 ->from('records')
                 ->where('projectid', $projectId);
         })
-            ->select('id', 'name', 'filenumber', 'mobile', 'gender', 'dob')
+            ->select($fields)
             ->latest()
-            ->get();
+            ->paginate(15);
 
         return response()->json([
             'success' => true,
@@ -416,9 +439,15 @@ class RecordController extends Controller
                 'start_date'    => $project->startdate?->format('Y-m-d'),
                 'end_date'      => $project->enddate?->format('Y-m-d'),
                 'budget'        => $project->budget,
-                'patients'      => $patients,
+                'patients'      => $patients->items(),
             ],
-            'total_patients' => $patients->count(),
+            'total_patients' => $patients->total(),
+            'meta' => [
+                'current_page' => $patients->currentPage(),
+                'last_page' => $patients->lastPage(),
+                'per_page' => $patients->perPage(),
+                'total' => $patients->total(),
+            ]
         ]);
     }
 }

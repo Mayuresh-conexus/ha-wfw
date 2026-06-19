@@ -18,7 +18,8 @@ class MedicineController extends Controller
             ->get();
 
         return response()->json([
-            'status' => true,
+            'success' => true,
+            'message' => 'Medicines retrieved successfully',
             'data' => $medicine,
         ]);
     }
@@ -44,7 +45,7 @@ public function bulkStore(Request $request)
     }
 
     return response()->json([
-        'status' => true,
+        'success' => true,
         'message' => 'Medicines uploaded successfully',
         'count' => count($created),
         'data' => $created

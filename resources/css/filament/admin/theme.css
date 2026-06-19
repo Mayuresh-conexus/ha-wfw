@@ -1,0 +1,90 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@config 'tailwind.config.js';
+
+/*
+|--------------------------------------------------------------------------
+| HealthApp Admin — Enterprise console theme
+|--------------------------------------------------------------------------
+| Premium, console-grade styling layered on top of Filament's base theme.
+| Goal: AWS / Hostinger control-plane feel — calm surfaces, crisp cards,
+| clear hierarchy, restrained accents.
+*/
+
+:root {
+    --ha-radius: 0.9rem;
+    --ha-ring: 0 0 0 1px rgb(15 23 42 / 0.04);
+    --ha-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.12);
+    --ha-shadow-hover: 0 2px 4px rgb(15 23 42 / 0.06), 0 16px 40px -16px rgb(15 23 42 / 0.22);
+}
+
+/* Softer app canvas so cards read as elevated surfaces */
+.fi-main {
+    background:
+        radial-gradient(1200px 600px at 100% -10%, rgb(13 148 136 / 0.05), transparent 60%),
+        radial-gradient(900px 500px at -10% 0%, rgb(2 132 199 / 0.04), transparent 55%);
+}
+.dark .fi-main {
+    background:
+        radial-gradient(1200px 600px at 100% -10%, rgb(13 148 136 / 0.10), transparent 60%),
+        radial-gradient(900px 500px at -10% 0%, rgb(2 132 199 / 0.08), transparent 55%);
+}
+
+/* ---- Section zones (Overview / Clinical Ops / System Health …) ---- */
+.ha-zone { @apply mb-8; }
+.ha-zone__header { @apply flex items-center gap-3 mb-4; }
+.ha-zone__title { @apply text-base font-semibold tracking-tight text-gray-800 dark:text-gray-100; }
+.ha-zone__rule { @apply h-px flex-1 bg-gradient-to-r from-gray-200 to-transparent dark:from-white/10; }
+.ha-zone__badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium
+           bg-primary-50 text-primary-700 ring-1 ring-inset ring-primary-600/10
+           dark:bg-primary-500/10 dark:text-primary-300 dark:ring-primary-400/20;
+}
+
+/* ---- KPI / stat cards: crisper, elevated, hover lift ---- */
+.fi-wi-stats-overview-stat {
+    border-radius: var(--ha-radius);
+    box-shadow: var(--ha-ring), var(--ha-shadow);
+    transition: box-shadow .18s ease, transform .18s ease;
+}
+.fi-wi-stats-overview-stat:hover {
+    box-shadow: var(--ha-ring), var(--ha-shadow-hover);
+    transform: translateY(-2px);
+}
+.fi-wi-stats-overview-stat .fi-wi-stats-overview-stat-value {
+    @apply text-3xl font-semibold tracking-tight;
+    font-variant-numeric: tabular-nums;
+}
+.fi-wi-stats-overview-stat .fi-wi-stats-overview-stat-label {
+    @apply text-[0.78rem] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400;
+}
+
+/* ---- Generic widget cards ---- */
+.fi-section,
+.fi-wi-chart {
+    border-radius: var(--ha-radius);
+    box-shadow: var(--ha-ring), var(--ha-shadow);
+}
+
+/* ---- Custom console cards (System Health, etc.) ---- */
+.ha-card {
+    @apply rounded-2xl bg-white dark:bg-gray-900 p-5 ring-1 ring-gray-950/5 dark:ring-white/10;
+    box-shadow: var(--ha-shadow);
+}
+.ha-card__title { @apply text-sm font-semibold text-gray-700 dark:text-gray-200; }
+
+.ha-metric { @apply flex items-center justify-between py-2.5; }
+.ha-metric + .ha-metric { @apply border-t border-gray-100 dark:border-white/5; }
+.ha-metric__label { @apply text-sm text-gray-500 dark:text-gray-400; }
+.ha-metric__value { @apply text-sm font-semibold text-gray-800 dark:text-gray-100 tabular-nums; }
+
+/* Status pills used across the console */
+.ha-pill { @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium; }
+.ha-pill--ok   { @apply bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/15 dark:bg-emerald-500/10 dark:text-emerald-300; }
+.ha-pill--warn { @apply bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/15 dark:bg-amber-500/10 dark:text-amber-300; }
+.ha-pill--down { @apply bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/15 dark:bg-rose-500/10 dark:text-rose-300; }
+.ha-dot { @apply h-1.5 w-1.5 rounded-full bg-current; }
+
+/* Thin usage bars (storage, capacity) */
+.ha-bar { @apply h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/10; }
+.ha-bar__fill { @apply h-full rounded-full bg-primary-500 transition-all; }

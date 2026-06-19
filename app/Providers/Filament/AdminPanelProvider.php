@@ -25,12 +25,6 @@ use App\Filament\Widgets\PatientTrendWidget;
 
 class AdminPanelProvider extends PanelProvider
 {
-    public function register(): void
-    {
-        file_put_contents(base_path('executed_register.txt'), 'REGISTER CALLED');
-        parent::register();
-    }
-
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -38,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->font('Inter')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandName('HealthApp Admin')
             ->profile()
             ->login(\App\Filament\Pages\Auth\CustomLogin::class)
@@ -52,16 +47,10 @@ class AdminPanelProvider extends PanelProvider
 ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([
-                Pages\Dashboard::class,
-            ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                // Widgets\AccountWidget::class,
-                // Widgets\FilamentInfoWidget::class,
-               AdminStatsWidget::class,
-               PatientsPerProgram::class,
-               PatientTrendWidget::class,
+                // Dashboard composition is handled by the custom zoned Dashboard page
+                // (App\Filament\Pages\Dashboard), which embeds widgets explicitly per zone.
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -83,4 +72,3 @@ class AdminPanelProvider extends PanelProvider
             ]);
     }
 }
-// test modify

@@ -48,14 +48,4 @@
             @livewire(\App\Filament\Widgets\UpcomingCallsTable::class)
         </div>
     </section>
-
-    {{-- ── System Health ────────────────────────────────────────── --}}
-    <section class="ha-zone">
-        <div class="ha-zone__header">
-            <span class="ha-zone__title">System Health</span>
-            <div class="ha-zone__rule"></div>
-        </div>
-
-        @livewire(\App\Filament\Widgets\SystemHealthWidget::class)
-    </section>
 </x-filament-panels::page>

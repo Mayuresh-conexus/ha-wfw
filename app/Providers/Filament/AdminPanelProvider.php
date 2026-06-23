@@ -34,6 +34,8 @@ class AdminPanelProvider extends PanelProvider
             ->font('Inter')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandName('HealthApp Admin')
+            ->brandLogo(asset('images/halogo.png'))
+            ->brandLogoHeight('2.5rem')
             ->profile()
             ->login(\App\Filament\Pages\Auth\CustomLogin::class)
             ->passwordReset()

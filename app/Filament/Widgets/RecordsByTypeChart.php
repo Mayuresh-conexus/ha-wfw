@@ -37,7 +37,9 @@ class RecordsByTypeChart extends ChartWidget
             return array_slice($merged, 0, 8, true);
         });
 
-        $palette = ['#0d9488', '#0284c7', '#7c3aed', '#d97706', '#dc2626', '#059669', '#db2777', '#64748b'];
+        // Brand-only palette: alternating tints/shades of navy (#093E62) and
+        // orange (#F98713) so up to 8 slices stay distinguishable on-brand.
+        $palette = ['#093E62', '#F98713', '#1B6B9C', '#FBA34A', '#3E8FBF', '#C76A0E', '#7FB4D6', '#FCC78A'];
 
         return [
             'datasets' => [[

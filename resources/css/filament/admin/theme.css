@@ -18,16 +18,16 @@
     --ha-shadow-hover: 0 2px 4px rgb(15 23 42 / 0.06), 0 16px 40px -16px rgb(15 23 42 / 0.22);
 }
 
-/* Softer app canvas so cards read as elevated surfaces */
+/* Softer app canvas so cards read as elevated surfaces (brand: navy + orange) */
 .fi-main {
     background:
-        radial-gradient(1200px 600px at 100% -10%, rgb(13 148 136 / 0.05), transparent 60%),
-        radial-gradient(900px 500px at -10% 0%, rgb(2 132 199 / 0.04), transparent 55%);
+        radial-gradient(1200px 600px at 100% -10%, rgb(9 62 98 / 0.05), transparent 60%),
+        radial-gradient(900px 500px at -10% 0%, rgb(249 135 19 / 0.04), transparent 55%);
 }
 .dark .fi-main {
     background:
-        radial-gradient(1200px 600px at 100% -10%, rgb(13 148 136 / 0.10), transparent 60%),
-        radial-gradient(900px 500px at -10% 0%, rgb(2 132 199 / 0.08), transparent 55%);
+        radial-gradient(1200px 600px at 100% -10%, rgb(9 62 98 / 0.12), transparent 60%),
+        radial-gradient(900px 500px at -10% 0%, rgb(249 135 19 / 0.08), transparent 55%);
 }
 
 /* ---- Section zones (Overview / Clinical Ops / System Health …) ---- */
@@ -80,9 +80,13 @@
 
 /* Status pills used across the console */
 .ha-pill { @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium; }
+/* Status pills (reserved for genuine good / caution / bad signals) */
 .ha-pill--ok   { @apply bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/15 dark:bg-emerald-500/10 dark:text-emerald-300; }
 .ha-pill--warn { @apply bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/15 dark:bg-amber-500/10 dark:text-amber-300; }
 .ha-pill--down { @apply bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/15 dark:bg-rose-500/10 dark:text-rose-300; }
+/* Brand pills (non-status, decorative counts/labels) — navy + orange */
+.ha-pill--brand  { @apply bg-[#093E62]/10 text-[#093E62] ring-1 ring-inset ring-[#093E62]/15 dark:bg-[#093E62]/30 dark:text-[#9CC4DE] dark:ring-white/10; }
+.ha-pill--accent { @apply bg-[#F98713]/10 text-[#B5630A] ring-1 ring-inset ring-[#F98713]/25 dark:bg-[#F98713]/15 dark:text-[#F9A94E]; }
 .ha-dot { @apply h-1.5 w-1.5 rounded-full bg-current; }
 
 /* Thin usage bars (storage, capacity) */

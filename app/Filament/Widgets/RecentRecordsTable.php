@@ -40,7 +40,7 @@ class RecentRecordsTable extends BaseWidget
                 TextColumn::make('record_type')
                     ->label('Type')
                     ->badge()
-                    ->color('info')
+                    ->color('primary')
                     ->placeholder('—'),
 
                 TextColumn::make('status')
@@ -68,7 +68,8 @@ class RecentRecordsTable extends BaseWidget
     {
         return match (strtolower((string) $state)) {
             'completed', 'done', 'closed', 'resolved', 'reviewed', 'approved' => 'success',
-            'in_progress', 'in progress', 'processing', 'submitted', 'open' => 'info',
+            // "in flight" — not good/bad, so brand navy rather than the old sky 'info'
+            'in_progress', 'in progress', 'processing', 'submitted', 'open' => 'primary',
             'pending', 'new', 'draft', 'awaiting' => 'warning',
             'cancelled', 'canceled', 'rejected', 'failed' => 'danger',
             default => 'gray',

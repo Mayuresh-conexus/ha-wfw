@@ -13,9 +13,9 @@
                             {{ $row['name'] }}
                         </span>
                         <span class="flex shrink-0 items-center gap-2 text-xs">
-                            <span class="ha-pill ha-pill--ok">{{ $row['records'] }} records</span>
+                            <span class="ha-pill ha-pill--brand">{{ $row['records'] }} records</span>
                             @if ($row['calls'] > 0)
-                                <span class="ha-pill ha-pill--warn">{{ $row['calls'] }} calls</span>
+                                <span class="ha-pill ha-pill--accent">{{ $row['calls'] }} calls</span>
                             @endif
                         </span>
                     </div>

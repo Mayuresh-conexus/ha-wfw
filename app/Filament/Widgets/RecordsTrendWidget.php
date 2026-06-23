@@ -40,8 +40,8 @@ class RecordsTrendWidget extends ChartWidget
                 [
                     'label' => 'Records',
                     'data' => $data,
-                    'backgroundColor' => 'rgba(2, 132, 199, 0.55)',
-                    'hoverBackgroundColor' => 'rgba(2, 132, 199, 0.85)',
+                    'backgroundColor' => 'rgba(249, 135, 19, 0.55)',
+                    'hoverBackgroundColor' => 'rgba(249, 135, 19, 0.85)',
                     'borderRadius' => 6,
                     'borderSkipped' => false,
                     'maxBarThickness' => 28,

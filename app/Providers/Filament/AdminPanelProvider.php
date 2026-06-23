@@ -41,7 +41,7 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->colors([
     'primary'   => Color::hex('#093E62'),  // main brand, buttons, active states
-    'secondary' => Color::hex('#B9DFF9'),  // brand accent (light blue)
+    'secondary' => Color::hex('#F98713'),  // brand accent (orange)
     'gray'      => Color::Slate,           // neutrals, borders, text hierarchy
     'info'      => Color::Sky,             // informational states
     'success'   => Color::Emerald,         // success states

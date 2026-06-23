@@ -3438,3 +3438,19 @@ Panel ID: admin
   [12] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\Application.php:986 - Illuminate\Container\Container->resolve
   [13] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Container\Container.php:731 - Illuminate\Foundation\Application->resolve
   [14] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\Application.php:971 - Illuminate\Container\Container->make
+Panel ID: admin
+  [0] C:\xampp\htdocs\ha-wfw\vendor\filament\filament\src\Facades\Filament.php:145 - Filament\PanelRegistry->register
+  [1] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Container\Container.php:1302 - Filament\Facades\Filament::Filament\Facades\{closure}
+  [2] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Container\Container.php:1248 - Illuminate\Container\Container->fireCallbackArray
+  [3] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Container\Container.php:813 - Illuminate\Container\Container->fireResolvingCallbacks
+  [4] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\Application.php:986 - Illuminate\Container\Container->resolve
+  [5] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Container\Container.php:731 - Illuminate\Foundation\Application->resolve
+  [6] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\Application.php:971 - Illuminate\Container\Container->make
+  [7] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\helpers.php:120 - Illuminate\Foundation\Application->make
+  [8] C:\xampp\htdocs\ha-wfw\vendor\filament\filament\src\FilamentManager.php:51 - app
+  [9] C:\xampp\htdocs\ha-wfw\vendor\filament\filament\src\FilamentServiceProvider.php:48 - Filament\FilamentManager->__construct
+  [10] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Container\Container.php:908 - Filament\FilamentServiceProvider->Filament\{closure}
+  [11] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Container\Container.php:795 - Illuminate\Container\Container->build
+  [12] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\Application.php:986 - Illuminate\Container\Container->resolve
+  [13] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Container\Container.php:731 - Illuminate\Foundation\Application->resolve
+  [14] C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\Application.php:971 - Illuminate\Container\Container->make

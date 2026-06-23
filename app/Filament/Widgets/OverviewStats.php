@@ -50,13 +50,13 @@ class OverviewStats extends StatsOverviewWidget
             Stat::make('Active Patients', number_format($d['activePatients']))
                 ->description($d['inactivePatients'] . ' inactive')
                 ->descriptionIcon('heroicon-m-check-badge')
-                ->color('success'),
+                ->color('primary'),
 
             Stat::make('Clinical Records', number_format($d['totalRecords']))
                 ->description($d['recordsThisMonth'] . ' logged this month')
                 ->descriptionIcon('heroicon-m-clipboard-document-list')
                 ->chart($d['recordsSeries'])
-                ->color('info'),
+                ->color('primary'),
 
             Stat::make('Records This Month', number_format($d['recordsThisMonth']))
                 ->description($this->deltaLabel($rPct, $rDir) . ' vs last month')

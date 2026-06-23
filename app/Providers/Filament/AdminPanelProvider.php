@@ -40,12 +40,13 @@ class AdminPanelProvider extends PanelProvider
             ->login(\App\Filament\Pages\Auth\CustomLogin::class)
             ->passwordReset()
             ->colors([
-    'primary' => Color::Teal,     // main brand, buttons, active states
-    'gray'    => Color::Slate,    // neutrals, borders, text hierarchy
-    'info'    => Color::Sky,      // informational states
-    'success' => Color::Emerald,  // success states
-    'warning' => Color::Amber,    // warnings
-    'danger'  => Color::Rose,     // errors, critical
+    'primary'   => Color::hex('#093E62'),  // main brand, buttons, active states
+    'secondary' => Color::hex('#B9DFF9'),  // brand accent (light blue)
+    'gray'      => Color::Slate,           // neutrals, borders, text hierarchy
+    'info'      => Color::Sky,             // informational states
+    'success'   => Color::Emerald,         // success states
+    'warning'   => Color::Amber,           // warnings
+    'danger'    => Color::Rose,            // errors, critical
 ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

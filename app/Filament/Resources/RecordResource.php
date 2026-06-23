@@ -60,6 +60,9 @@ class RecordResource extends Resource
             ->schema([
                 ViewField::make('patient_summary')
                     ->view('filament.forms.patient-summary')
+                    // Populate on form load (edit) too, not only on patient change,
+                    // so opening an existing record shows the summary immediately.
+                    ->afterStateHydrated(fn (Set $set, Get $get) => self::fillPatientSummary($set, $get))
                     ->default([
                         'patient' => null,
                         'generalHealthFiles' => [],

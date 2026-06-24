@@ -39,13 +39,15 @@ class OverviewStats extends StatsOverviewWidget
                 ->description($d['patientsThisMonth'] . ' new this month')
                 ->descriptionIcon($this->trendIcon($pDir))
                 ->chart($d['patientsSeries'])
-                ->color($this->trendColor($pDir)),
+                ->chartColor('secondary')                       // brand orange sparkline
+                ->descriptionColor($this->trendColor($pDir)),   // functional trend (green/red)
 
             Stat::make('New This Month', number_format($d['patientsThisMonth']))
                 ->description($this->deltaLabel($pPct, $pDir) . ' vs last month')
                 ->descriptionIcon($this->trendIcon($pDir))
                 ->chart($d['patientsSeries'])
-                ->color($this->trendColor($pDir)),
+                ->chartColor('secondary')
+                ->descriptionColor($this->trendColor($pDir)),
 
             Stat::make('Active Patients', number_format($d['activePatients']))
                 ->description($d['inactivePatients'] . ' inactive')
@@ -56,13 +58,15 @@ class OverviewStats extends StatsOverviewWidget
                 ->description($d['recordsThisMonth'] . ' logged this month')
                 ->descriptionIcon('heroicon-m-clipboard-document-list')
                 ->chart($d['recordsSeries'])
-                ->color('primary'),
+                ->chartColor('secondary')        // brand orange sparkline
+                ->descriptionColor('primary'),   // navy label icon (neutral, not a trend)
 
             Stat::make('Records This Month', number_format($d['recordsThisMonth']))
                 ->description($this->deltaLabel($rPct, $rDir) . ' vs last month')
                 ->descriptionIcon($this->trendIcon($rDir))
                 ->chart($d['recordsSeries'])
-                ->color($this->trendColor($rDir)),
+                ->chartColor('secondary')
+                ->descriptionColor($this->trendColor($rDir)),
 
             Stat::make('Active Projects', number_format($d['activeProjects']))
                 ->description($d['activePrograms'] . ' active programs')

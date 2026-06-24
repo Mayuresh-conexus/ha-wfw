@@ -200,6 +200,12 @@ class RecordResource extends Resource
                 TextColumn::make('status')->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
+            ->filters([
+                Tables\Filters\SelectFilter::make('patientid')
+                    ->label('Patient')
+                    ->options(fn () => Patient::orderBy('name')->pluck('name', 'id'))
+                    ->searchable(),
+            ])
             ->headerActions([
                 Tables\Actions\ExportAction::make()
                     ->exporter(\App\Filament\Exports\RecordExporter::class),

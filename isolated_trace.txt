@@ -225,3 +225,4 @@ Panel passed to registerPanel from C:\xampp\htdocs\ha-wfw\vendor\laravel\framewo
 Panel passed to registerPanel from C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\Application.php, isClosure: YES
 Panel passed to registerPanel from C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\Application.php, isClosure: YES
 Panel passed to registerPanel from C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\Application.php, isClosure: YES
+Panel passed to registerPanel from C:\xampp\htdocs\ha-wfw\vendor\laravel\framework\src\Illuminate\Foundation\Application.php, isClosure: YES

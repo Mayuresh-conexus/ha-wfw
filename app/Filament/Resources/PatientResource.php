@@ -248,9 +248,9 @@ class PatientResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            PatientResource\RelationManagers\RecordsRelationManager::class,
-        ];
+        // Records are reached via the "View Record(s)" header action on the
+        // patient edit page instead of an embedded table below the form.
+        return [];
     }
 
     public static function getPages(): array

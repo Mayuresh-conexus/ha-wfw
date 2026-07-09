@@ -88,7 +88,7 @@ class PatientResource extends Resource
 
         return array_values($state);
     }),
-                FileUpload::make('medicationupload')->label('Medication File')
+                FileUpload::make('medicationupload')->label('Medication File (Patient Upload)')
                 ->disk('public')
                 ->directory(fn (callable $get) => 'patients/' . $get('filenumber'))
                 ->preserveFilenames()

@@ -76,7 +76,6 @@ class RecordResource extends Resource
             ->collapsed()
     ->visible(fn (Get $get) => filled($get('patientid'))),
 
-
             Forms\Components\Select::make('doctorid')
                 ->label('Doctors')
                 ->options(fn () => \App\Models\User::role('doctor')->pluck('name', 'id'))
@@ -149,13 +148,23 @@ class RecordResource extends Resource
            return array_values($state);
     }),
 
-            Forms\Components\Select::make('status')
-                ->options([
-                    'draft' => 'Draft',
-                    'submitted' => 'Submitted',
-                    'reviewed' => 'Reviewed',
-                ])
-                ->default('draft'),
+            // Same file field as the Patient page (patients.medicationupload) —
+            // editable from either place, not a separate copy. See
+            // EditRecord::mutateFormDataBeforeSave() for the save-back to Patient.
+            Forms\Components\FileUpload::make('patient_medicationupload')
+                ->label('Medication File (Patient Upload)')
+                ->disk('public')
+                ->directory(fn (Get $get) => 'patients/' . (Patient::find($get('patientid'))?->filenumber ?? 'unknown'))
+                ->preserveFilenames()
+                ->multiple()
+                ->reorderable()
+                ->acceptedFileTypes(['image/jpeg', 'image/png', 'application/pdf', 'image/jpg'])
+                ->maxSize(5120)
+                ->afterStateHydrated(function (Set $set, Get $get) {
+                    $set('patient_medicationupload', Patient::find($get('patientid'))?->medicationupload ?? []);
+                })
+                ->hidden(fn (string $operation) => $operation === 'create')
+                ->visible(fn (Get $get) => filled($get('patientid'))),
         ]);
     }
 
@@ -240,6 +249,8 @@ class RecordResource extends Resource
     {
         return [
             RelationManagers\CallsRelationManager::class,
+            RelationManagers\PrescriptionsRelationManager::class,
+            RelationManagers\CommentsRelationManager::class,
         ];
     }
 

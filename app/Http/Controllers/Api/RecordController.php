@@ -10,6 +10,7 @@ use App\Models\ScheduledCall;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class RecordController extends Controller
 {
@@ -30,6 +31,7 @@ class RecordController extends Controller
             'notes'            => 'nullable|string',
             'attachments.*'    => 'file|mimes:jpg,jpeg,png,pdf|max:5120',
             'status'           => 'nullable|in:draft,submitted,reviewed',
+            'patient_status'   => ['nullable', Rule::in(Record::PATIENT_STATUSES)],
             'doctorid'         => 'nullable|array',
             'doctorid.*'       => 'integer|exists:users,id',
             'gpid'             => 'nullable|array',
@@ -101,6 +103,7 @@ class RecordController extends Controller
             'notes'            => 'nullable|string',
             'attachments.*'    => 'file|mimes:jpg,jpeg,png,pdf|max:5120',
             'status'           => 'nullable|in:draft,submitted,reviewed',
+            'patient_status'   => ['nullable', Rule::in(Record::PATIENT_STATUSES)],
             'doctorid'         => 'nullable|array',
             'doctorid.*'       => 'integer|exists:users,id',
             'gpid'             => 'nullable|array',
@@ -132,6 +135,10 @@ class RecordController extends Controller
 
         if ($request->filled('status')) {
             $data['status'] = $validated['status'];
+        }
+
+        if ($request->has('patient_status')) {
+            $data['patient_status'] = $validated['patient_status'] ?? null;
         }
 
         // Handle question_summary
@@ -195,7 +202,7 @@ class RecordController extends Controller
         $patient = Patient::findOrFail($patientId);
 
         $fields = $this->getSelectFields(request(), [
-            'id', 'patientid', 'volunteerid', 'projectid', 'programid', 'status', 'doctorid', 'gpid', 'symptom_ids', 'question_summary', 'notes', 'attachments', 'created_at'
+            'id', 'patientid', 'volunteerid', 'projectid', 'programid', 'status', 'patient_status', 'doctorid', 'gpid', 'symptom_ids', 'question_summary', 'notes', 'attachments', 'created_at'
         ]);
 
         // Get all records for this patient by current volunteer
@@ -268,6 +275,7 @@ class RecordController extends Controller
                 'notes'            => $record->notes ?? null,
                 'attachments'      => $attachments,
                 'status'           => $record->status,
+                'patient_status'   => $record->patient_status,
                 'created_at'       => $record->created_at,
                 'appointment'      => $appointmentData,
             ];
@@ -313,6 +321,60 @@ class RecordController extends Controller
                 'per_page' => $records->perPage(),
                 'total' => $records->total(),
             ]
+        ]);
+    }
+
+    /**
+     * Update only the clinical patient status of a record (audit outcome).
+     * POST /api/v1/records/{record}/patient-status
+     *
+     * Allowed for the record's owning volunteer, its assigned doctors/GPs, or
+     * an admin — so the care team can set the status during review (the general
+     * update() endpoint is restricted to the owning volunteer).
+     */
+    public function updatePatientStatus(Request $request, Record $record)
+    {
+        $validated = $request->validate([
+            'patient_status' => ['required', Rule::in(Record::PATIENT_STATUSES)],
+        ]);
+
+        $userId = (int) auth()->id();
+        $doctorIds = array_map('intval', (array) $record->doctorid);
+        $gpIds = array_map('intval', (array) $record->gpid);
+
+        $isCareTeam = $userId === (int) $record->volunteerid
+            || in_array($userId, $doctorIds, true)
+            || in_array($userId, $gpIds, true)
+            || (auth()->user()?->hasAnyRole(['admin', 'doctor', 'gp']) ?? false);
+
+        if (! $isCareTeam) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized: only the assigned care team can set the patient status.',
+            ], 403);
+        }
+
+        $record->update(['patient_status' => $validated['patient_status']]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Patient status updated successfully',
+            'data' => [
+                'record_id'      => $record->id,
+                'patient_status' => $record->patient_status,
+            ],
+        ]);
+    }
+
+    /**
+     * List the allowed clinical patient statuses (for the status dropdown).
+     * GET /api/v1/records/statuses
+     */
+    public function statuses()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => Record::PATIENT_STATUSES,
         ]);
     }
 

@@ -59,7 +59,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/locations/cities', [LocationController::class, 'cities']);
 
         // Record APIs
+        Route::get('/records/statuses', [RecordController::class, 'statuses']); // Allowed patient statuses
         Route::post('/records', [RecordController::class, 'store']);
+        Route::post('/records/{record}/patient-status', [RecordController::class, 'updatePatientStatus']); // Care-team status update
         Route::post('/records/{record}', [RecordController::class, 'update']);
         Route::get('/records/by-patient/{patientId}', [RecordController::class, 'byPatient']);
         Route::get('/records/by-project/{projectId}', [RecordController::class, 'byProject']); // New

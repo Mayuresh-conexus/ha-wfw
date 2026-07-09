@@ -93,6 +93,13 @@ class RecordResource extends Resource
                 ->multiple()
                 ->nullable(),
 
+            Forms\Components\Select::make('patient_status')
+                ->label('Status')
+                ->options(\App\Models\Record::patientStatusOptions())
+                ->placeholder('Select status')
+                ->searchable()
+                ->native(false),
+
             Forms\Components\Select::make('volunteerid')
                 ->label('Volunteer')
                 ->options(fn () => \App\Models\User::role('volunteer')->pluck('name', 'id'))

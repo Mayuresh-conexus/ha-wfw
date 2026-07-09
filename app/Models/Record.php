@@ -11,6 +11,28 @@ class Record extends Model
 {
     use LogsActivity, SoftDeletes;
 
+    /**
+     * Clinical/patient statuses the care team can assign after auditing a
+     * record. Single source of truth shared by the admin form and the API.
+     * Stored as the label string in `records.patient_status`.
+     */
+    public const PATIENT_STATUSES = [
+        'Normal',
+        'Critical',
+        'Medicine Prescribed',
+        'Required Specialist Doctor',
+        'No Treatment Required',
+        'Required Additional Reports',
+        'Video call Scheduled',
+        'Treatment Complete',
+    ];
+
+    /** value => label map for Filament / <select> options. */
+    public static function patientStatusOptions(): array
+    {
+        return array_combine(self::PATIENT_STATUSES, self::PATIENT_STATUSES);
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -33,6 +55,7 @@ class Record extends Model
         'notes',
         'attachments',
         'status',
+        'patient_status',
         'submitted_at',
     ];
 
